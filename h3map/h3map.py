@@ -3,36 +3,60 @@ import struct
 import sys
 
 
+class Parser:
+    def __init__(self, buffer):
+        self.buffer = buffer
+        self.current = 0
 
-def get_format_string(repetitions, character):
-    return str(repetitions) + character
+    def _next(self, size):
+        start = self.current
+        stop = start + size
+        self.current = stop
+
+        return start, stop
+
+    def _get_format_string(self, repetitions, character):
+        return str(repetitions) + character
+
+    def uint8(self):
+        start, stop = self._next(1)
+        return struct.unpack('H', self.buffer[start:stop])[0]
+
+    def uint32(self):
+        start, stop = self._next(4)
+        return struct.unpack('I', self.buffer[start:stop])[0]
+
+    def bool(self):
+        start, stop = self._next(1)
+        return struct.unpack('?', self.buffer[start:stop])[0]
+
+    def uchar(self):
+        start, stop = self._next(1)
+        return struct.unpack('B', self.buffer[start:stop])[0]
+
+    def string(self):
+        size = self.uint32()
+        start, stop = self._next(size)
+        pattern = self._get_format_string(size, 's')
+
+        return struct.unpack(pattern, self.buffer[start:stop])[0]
 
 
-def parse_header(buffer):
-    version = struct.unpack('I', buffer[:4])
-    any_players = struct.unpack('?', buffer[4:5])
-    height = struct.unpack('I', buffer[5:9])
-    two_level = struct.unpack('?', buffer[6:7])
-    size_name = struct.unpack('I', buffer[10:14])[0]
-
-    end_name = 14 + size_name
-    name = struct.unpack(get_format_string(size_name, "s"), buffer[14:end_name])
-
-    size_desc = struct.unpack('I', buffer[end_name:end_name + 4])[0]
-    desc = struct.unpack(get_format_string(size_desc, "s"), buffer[end_name + 4:end_name + 4 + size_desc])
-
-    end_desc = end_name + 4 + size_desc
-    diff = struct.unpack('B', buffer[end_desc:end_desc+1])
-
-    max_level = struct.unpack('B', buffer[end_desc+1:end_desc+2])
+def parse_header(parser):
+    version = parser.uint32()
+    any_players = parser.bool()
+    height = parser.uint32()
+    two_level = parser.bool()
+    name = parser.string()
+    desc = parser.string()
+    diff = parser.uchar()
+    max_level = parser.uchar()
 
     print("Version: ", version)
     print("any players: ", any_players)
     print("height: ", height)
     print("two level: ", two_level)
-    print("size of name: ", size_name)
     print("name: ", name)
-    print("size of desc: ", size_desc)
     print("description: ", desc)
     print("difficulty: ", diff)
     print("max hero level: ", max_level)
@@ -44,7 +68,8 @@ def parse_player_info(content):
 
 
 def main(map_contents):
-    parse_header(map_contents)
+    parser = Parser(map_contents)
+    parse_header(parser)
     #parse_player_info(remaining)
     #parse_victory_loss_conditions()
     #parseTeamInfo()
