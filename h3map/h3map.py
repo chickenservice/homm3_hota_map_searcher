@@ -242,6 +242,24 @@ def parse_victory_loss_condition(parser):
     return determine_winning_condition(parser), determine_loss_condition(parser)
 
 
+def parse_team_info(parser):
+    number_of_teams = parser.uint8()
+    teams = []
+    if number_of_teams > 0:
+        for player in range(0, 8):
+            team_id = parser.uint8()
+            teams.append(team_id)
+    else:
+        pass
+        for player in range(0, 8):
+            # TODO: Exclude single player teams if they can't be played
+            # if can_computer_play or can_human_play:
+            team_id = parser.uint8()
+            teams.append(team_id)
+
+    return teams
+
+
 def main(map_contents):
     parser = Parser(map_contents)
     parse_header(parser)
@@ -250,7 +268,8 @@ def main(map_contents):
     win, loss = parse_victory_loss_condition(parser)
     print(win)
     print(loss)
-    # parseTeamInfo()
+    teams = parse_team_info(parser)
+    print(teams)
     # parseAllowedHeroes()
 
 
