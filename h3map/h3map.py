@@ -3,8 +3,8 @@ import gzip
 
 import click
 
-from parser import Parser
-import header.Reader as Reader
+from h3map.parser import Parser
+import h3map.header.Reader as Reader
 
 
 def parse(map_contents):
@@ -12,7 +12,7 @@ def parse(map_contents):
     reader = Reader.Reader(parser)
     header = reader.read()
 
-    return header.metadata.name, header.metadata.size
+    return header
 
 
 def load(files):
@@ -22,9 +22,8 @@ def load(files):
     for i, map_file in enumerate(files):
         map_contents = gzip.open(map_file, 'rb').read()
         try:
-            name, size = parse(map_contents)
-            maps[map_file] = size
-            print(name)
+            header = parse(map_contents)
+            maps[map_file] = header
         except Exception as e:
             print("Sorry map couldn't be loaded for " + map_file + " due to an error: ", e)
 
@@ -49,10 +48,14 @@ def filter(files, size):
 
 @h3map.command(name="list")
 @click.argument('files', nargs=-1, type=click.Path())
-def list_maps(files):
+@click.option('--detailed', is_flag=True)
+def list_maps(files, detailed):
     maps = load(files)
     for i, j in maps.items():
-        print(i)
+        if detailed:
+            print(j)
+        else:
+            print(j.metadata.name)
 
     print("Loaded {0} maps".format(len(maps)))
 

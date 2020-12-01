@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 from typing import List
 
-from header.RoeReader import RoeReader
-from header.AbReader import AbReader
-from header.SodReader import SodReader
-from header.HotaReader import HotaReader
-from header.WogReader import WogReader
+from h3map.header.RoeReader import RoeReader
+from h3map.header.AbReader import AbReader
+from h3map.header.SodReader import SodReader
+from h3map.header.HotaReader import HotaReader
+from h3map.header.WogReader import WogReader
 
-from header.models.nodes import Metadata, PlayerInfo
+from h3map.header.models.nodes import Metadata, PlayerInfo
 
 
 @dataclass
@@ -15,8 +15,26 @@ class Header:
     metadata: Metadata
     players_info: List[PlayerInfo]
     teams: List[str]
+    alliances: bool
     allowed_heroes: List[str]
     conditions: List[str]
+
+    def __repr__(self):
+        string = "Name: {0}\nVersion: {1}\n\nDescription: {2}\n"\
+            .format(self.metadata.name.decode('utf-8'), self.metadata.version, self.metadata.description.decode('utf-8'))
+
+        for i, player in enumerate(self.players_info):
+            string += "\nPlayer: {0}\n".format(i)
+            string += "Factions: {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}\n".format(*player.p7)
+
+        string += "Alliances: {0}".format(self.alliances)
+        for team in self.teams:
+            string += "\nTeam: {0}\n".format(team)
+
+        for condition in self.conditions:
+            string += "\nCondition: {0}\n".format(condition)
+
+        return string
 
 
 class Reader:
@@ -39,13 +57,14 @@ class Reader:
         reader = self._get_reader(version)
 
         metadata, player_info = reader.read()
-        teams = self.read_teams()
+        teams, alliances = self.read_teams()
         allowed_heroes = self.read_allowed_heroes()
         conditions = self.read_victory_loss_condition()
 
-        return Header(metadata, player_info, teams, allowed_heroes, conditions)
+        return Header(metadata, player_info, teams, alliances, allowed_heroes, conditions)
 
     def read_teams(self):
+        alliances = True
         number_of_teams = self.parser.uint8()
         teams = []
         if number_of_teams > 0:
@@ -53,14 +72,14 @@ class Reader:
                 team_id = self.parser.uint8()
                 teams.append(team_id)
         else:
-            pass
+            alliances = False
             for player in range(0, 8):
                 # TODO: Exclude single player teams if they can't be played
                 # if can_computer_play or can_human_play:
                 team_id = self.parser.uint8()
                 teams.append(team_id)
 
-        return teams
+        return teams, alliances
 
     def read_allowed_heroes(self, negate=False):
         allowed_heroes = [True] * self.limit
