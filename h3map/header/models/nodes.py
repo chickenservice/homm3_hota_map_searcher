@@ -11,14 +11,6 @@ class PlayerInfo(abc.ABC):
     pass
 
 
-class Teams(abc.ABC):
-    pass
-
-
-class AllowedHeroes(abc.ABC):
-    pass
-
-
 @dataclass
 class Hero:
     id: int

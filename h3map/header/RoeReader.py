@@ -33,9 +33,7 @@ class RoeReader:
     def read(self):
         metadata = self._read_metadata()
         player_info = self._read_player_info()
-        teams = self._read_teams()
-        allowed_heroes = self._read_allowed_heroes()
-        return metadata, player_info, teams, allowed_heroes
+        return metadata, player_info
 
     def _read_metadata(self):
         any_players = self.parser.bool()
