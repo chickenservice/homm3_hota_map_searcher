@@ -58,7 +58,3 @@ def list_maps(files, detailed):
             print(j.metadata.description.name)
 
     print("Loaded {0} maps".format(len(maps)))
-
-
-if __name__ == "__main__":
-    h3map()

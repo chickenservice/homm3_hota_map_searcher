@@ -1,6 +1,6 @@
 import abc
 
-from h3map.header.MapReader import MapReader
+from h3map.header.map_reader import MapReader
 from h3map.header.models import PlayerInfo
 
 from h3map.header.models import AiType, FactionInfo

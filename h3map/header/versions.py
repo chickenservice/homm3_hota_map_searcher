@@ -1,8 +1,8 @@
-from h3map.header.AbReader import AbReader
-from h3map.header.HotaReader import HotaReader
-from h3map.header.RoeReader import RoeReader
-from h3map.header.SodReader import SodReader
-from h3map.header.WogReader import WogReader
+from h3map.header.ab_reader import AbReader
+from h3map.header.hota_reader import HotaReader
+from h3map.header.roe_reader import RoeReader
+from h3map.header.sod_reader import SodReader
+from h3map.header.wog_reader import WogReader
 
 
 supported_versions = {

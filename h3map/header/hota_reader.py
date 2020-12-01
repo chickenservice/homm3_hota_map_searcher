@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from h3map.header.MapReader import MapReader
+from h3map.header.map_reader import MapReader
 from h3map.header.models import MapProperties, Version
 
 

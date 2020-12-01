@@ -1,4 +1,4 @@
-from h3map.header.MapReader import MapReader
+from h3map.header.map_reader import MapReader
 
 
 class SodReader(MapReader):
