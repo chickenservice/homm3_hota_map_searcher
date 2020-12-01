@@ -15,4 +15,4 @@ def parse_header(parser):
     diff = parser.uint8()
     max_level = parser.uint8()
 
-    return version, name
+    return version, name, height
