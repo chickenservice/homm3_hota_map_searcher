@@ -4,37 +4,30 @@ import gzip
 import click
 
 from parser import Parser
-from header.metadata import parse_header
-from header.players import parse_player_info
-from header.conditions import parse_victory_loss_condition
-from header.teams import parse_team_info
-from header.heroes import parse_allowed_heroes, heroes
+import header.Reader as Reader
 
 
 def parse(map_contents):
     parser = Parser(map_contents)
-    version, name, size = parse_header(parser)
-    players = parse_player_info(parser, version)
-    win, loss = parse_victory_loss_condition(parser)
-    teams = parse_team_info(parser)
-    allowed_heroes = parse_allowed_heroes(parser, False, len(heroes))
+    reader = Reader.Reader(parser)
+    header = reader.read()
 
-    return name, size
+    return header.metadata.name, header.metadata.size
 
 
 def load(files):
     maps = {}
     if not len(files):
         files = glob.glob("reference_maps/" + "*.h3m")
-    for map_file in files:
+    for i, map_file in enumerate(files):
         map_contents = gzip.open(map_file, 'rb').read()
         try:
             name, size = parse(map_contents)
-            maps[name] = size
+            maps[map_file] = size
+            print(name)
         except Exception as e:
             print("Sorry map couldn't be loaded for " + map_file + " due to an error: ", e)
 
-    print("Loaded {0} maps".format(len(files)))
     return maps
 
 
@@ -60,6 +53,8 @@ def list_maps(files):
     maps = load(files)
     for i, j in maps.items():
         print(i)
+
+    print("Loaded {0} maps".format(len(maps)))
 
 
 if __name__ == "__main__":
