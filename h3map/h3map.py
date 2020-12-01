@@ -4,6 +4,149 @@ import sys
 from dataclasses import dataclass
 from typing import List
 
+# TODO: Define all heroes
+heroes = [
+    "adela",
+    "adelaide",
+    "aenain",
+    "aeris",
+    "aine",
+    "aislinn",
+    "ajit",
+    "alagar",
+    "alamar",
+    "alkin",
+    "andra",
+    "arlach",
+    "ash",
+    "astral",
+    "axsis",
+    "ayden",
+    "brissa",
+    "broghild",
+    "bron",
+    "caitlin",
+    "calh",
+    "calid",
+    "charna",
+    "christian",
+    "ciele",
+    "clancy",
+    "clavius",
+    "coronius",
+    "cragHack",
+    "cuthbert",
+    "cyra",
+    "dace",
+    "damacon",
+    "daremyth",
+    "darkstorn",
+    "deemer",
+    "dessa",
+    "drakon",
+    "elleshar",
+    "erdamon",
+    "fafner",
+    "fiona",
+    "fiur",
+    "galthran",
+    "gelare",
+    "gem",
+    "geon",
+    "gerwulf",
+    "gird",
+    "gretchin",
+    "grindan",
+    "gundula",
+    "gunnar",
+    "gurnisson",
+    "halon",
+    "ignatius",
+    "ignissa",
+    "inteus",
+    "iona",
+    "isra",
+    "ivor",
+    "jabarkas",
+    "jaegar",
+    "jeddite",
+    "jenova",
+    "josephine",
+    "kalt",
+    "korbac",
+    "krellion",
+    "kyrre",
+    "labetha",
+    "lacus",
+    "lorelei",
+    "loynis",
+    "malcom",
+    "malekith",
+    "marius",
+    "melodia",
+    "mephala",
+    "merist",
+    "mirlanda",
+    "moandor",
+    "monere",
+    "nagash",
+    "neela",
+    "nimbus",
+    "nymus",
+    "octavia",
+    "olema",
+    "oris",
+    "pasis",
+    "piquedram",
+    "pyre",
+    "rashka",
+    "rion",
+    "rissa",
+    "rosic",
+    "ryland",
+    "sandro",
+    "sanya",
+    "saurug",
+    "sephinroth",
+    "septienna",
+    "serena",
+    "shakti",
+    "shiva",
+    "sirMullich",
+    "solmyr",
+    "straker",
+    "styg",
+    "sylvia",
+    "synca",
+    "tamika",
+    "tazar",
+    "terek",
+    "thane",
+    "thant",
+    "theodorus",
+    "thorgrim",
+    "thunar",
+    "tiva",
+    "torosar ",
+    "tyraxor",
+    "tyris",
+    "ufretin",
+    "uland",
+    "verdish",
+    "vey",
+    "vidomina",
+    "vokial",
+    "voy",
+    "wystan",
+    "xarfax",
+    "xsi",
+    "xyron",
+    "yog",
+    "zubin",
+    "zydar"
+
+]
+
 conditions = {
     0: "ARTIFACT",
     1: "GATHERTROOP",
@@ -260,6 +403,19 @@ def parse_team_info(parser):
     return teams
 
 
+def parse_allowed_heroes(parser, negate, limit):
+    allowed_heroes = [True] * limit
+    for byte in range(0, 20):
+        allowed = parser.uint8()
+        for bit in range(0, 8):
+            if byte * 8 + bit < limit:
+                flag = allowed & (1 << bit)
+                if (negate & flag) or ((not negate) & (not flag)):
+                    allowed_heroes.insert(byte * 8 + bit, False)
+
+    return [hero for i, hero in enumerate(heroes) if allowed_heroes[i]]
+
+
 def main(map_contents):
     parser = Parser(map_contents)
     parse_header(parser)
@@ -270,7 +426,8 @@ def main(map_contents):
     print(loss)
     teams = parse_team_info(parser)
     print(teams)
-    # parseAllowedHeroes()
+    allowed_heroes = parse_allowed_heroes(parser, False, len(heroes))
+    print(allowed_heroes)
 
 
 if __name__ == "__main__":
