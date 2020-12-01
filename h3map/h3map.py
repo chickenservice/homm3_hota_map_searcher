@@ -284,7 +284,7 @@ def parse_player_info(parser, version):
         can_human_play = parser.bool()
         can_computer_play = parser.bool()
         if not (can_human_play or can_computer_play):
-            if 28 <= version <= 33:
+            if 28 <= version <= 32 or version == 51:
                 parser.skip(13)
             elif version == 21:
                 parser.skip(12)
@@ -294,7 +294,7 @@ def parse_player_info(parser, version):
 
         ai_tactic = parser.uint8()
         p7 = -1
-        if 28 <= version <= 33:
+        if 28 <= version <= 32 or version == 51:
             p7 = parser.uint8()
         allowed_factions = get_allowed_factions(parser, version)
         is_faction_random = parser.bool()
