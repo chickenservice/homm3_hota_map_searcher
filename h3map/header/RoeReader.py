@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from header.models.nodes import Metadata, PlayerInfo, Hero
+from h3map.header.models.nodes import Metadata, Hero, PlayerInfo
 
 
 @dataclass

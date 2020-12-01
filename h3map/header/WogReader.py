@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from header.models.nodes import Metadata, Hero, PlayerInfo
+from h3map.header.models.nodes import Metadata, Hero, PlayerInfo
 
 
 @dataclass
