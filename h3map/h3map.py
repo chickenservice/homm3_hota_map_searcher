@@ -220,7 +220,8 @@ class Parser:
 
     def string(self):
         size = self.uint32()
-        assert size < 500000
+        if size > 500000:
+            raise ValueError("Size too big for string.")
         start, stop = self._next(size)
         pattern = self._get_format_string(size, 's')
 
@@ -232,6 +233,8 @@ class Parser:
 
 def parse_header(parser):
     version = parser.uint32()
+    if 30 <= version <= 32:
+        parser.uint16()
     any_players = parser.bool()
     height = parser.uint32()
     two_level = parser.bool()
