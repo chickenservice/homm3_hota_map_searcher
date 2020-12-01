@@ -234,8 +234,13 @@ class Parser:
 def parse_header(parser):
     version = parser.uint32()
     if 30 <= version <= 32:
-        parser.uint16()
+        parser.uint32()
+        parser.uint8()
+
     any_players = parser.bool()
+    if 30 <= version <= 32:
+        parser.uint8()
+
     height = parser.uint32()
     two_level = parser.bool()
     name = parser.string()
@@ -279,7 +284,7 @@ def parse_player_info(parser, version):
         can_human_play = parser.bool()
         can_computer_play = parser.bool()
         if not (can_human_play or can_computer_play):
-            if version == 28 or version == 33:
+            if 28 <= version <= 33:
                 parser.skip(13)
             elif version == 21:
                 parser.skip(12)
@@ -289,7 +294,7 @@ def parse_player_info(parser, version):
 
         ai_tactic = parser.uint8()
         p7 = -1
-        if version == 28 or version == 33:
+        if 28 <= version <= 33:
             p7 = parser.uint8()
         allowed_factions = get_allowed_factions(parser, version)
         is_faction_random = parser.bool()
@@ -314,12 +319,12 @@ def parse_player_info(parser, version):
         hero_count = parser.uint8()
         parser.skip(3)
 
-        heroes = []
+        _heroes = []
         if version != 14:
             for i in range(0, hero_count):
                 _id = parser.uint8()
                 name = parser.string()
-                heroes.append(Hero(_id, name))
+                _heroes.append(Hero(_id, name))
 
         player = PlayerInfo(
             can_human_play,
@@ -330,7 +335,7 @@ def parse_player_info(parser, version):
             is_faction_random,
             has_main_town,
             has_random_hero,
-            heroes
+            _heroes
         )
 
         players.append(player)
@@ -464,7 +469,7 @@ if __name__ == "__main__":
             map_contents = gzip.open(map_file, 'rb').read()
             try:
                 main(map_contents)
-            except (ValueError, AssertionError, struct.error) as e:
+            except ValueError as e:
                 print("Sorry map couldn't be loaded due to an error: ", e)
     else:
         map_file = sys.argv[1]
