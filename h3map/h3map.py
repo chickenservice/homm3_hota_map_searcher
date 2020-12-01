@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import List
 
 # TODO: Define all heroes
+ROE = 14
 heroes = [
     "adela",
     "adelaide",
@@ -262,7 +263,7 @@ def get_allowed_factions(parser, version):
     if version != 14:
         allowed = total + parser.uint8() * 256
     else:
-        total -= 1
+        total = max(total - 1, 0)
     return [faction for i, faction in enumerate(factions[:total]) if (allowed & (1 << i))]
 
 
@@ -288,7 +289,7 @@ def parse_player_info(parser, version):
                 parser.skip(13)
             elif version == 21:
                 parser.skip(12)
-            elif version == 14:
+            elif version == ROE:
                 parser.skip(6)
             continue
 
@@ -301,7 +302,7 @@ def parse_player_info(parser, version):
         has_main_town = parser.bool()
 
         if has_main_town:
-            if version != 14:
+            if version != ROE:
                 parser.bool()
                 parser.bool()
             parser.uint8()
@@ -311,16 +312,23 @@ def parse_player_info(parser, version):
         has_random_hero = parser.bool()
         main_custom_hero_id = parser.uint8()
 
-        if main_custom_hero_id != 255 and version != 14:
+        # TODO: Add proper handling for different ROE extensions:
+        # https://github.com/potmdehex/homm3tools/blob/h3mlibhota/h3m/h3mlib/h3m_parsing/parse_players.c
+        if version == ROE:
+            if has_main_town and main_custom_hero_id != 255:
+                _id = parser.uint8()
+            elif not has_main_town and main_custom_hero_id != 255:
+                _id = parser.uint8()
+        elif main_custom_hero_id != 255:
             _id = parser.uint8()
             name = parser.string()
 
-        parser.uint8()
-        hero_count = parser.uint8()
-        parser.skip(3)
-
         _heroes = []
-        if version != 14:
+        if version != ROE:
+            parser.uint8()
+            hero_count = parser.uint8()
+            parser.skip(3)
+
             for i in range(0, hero_count):
                 _id = parser.uint8()
                 name = parser.string()
@@ -467,8 +475,8 @@ if __name__ == "__main__":
             map_contents = gzip.open(map_file, 'rb').read()
             try:
                 main(map_contents)
-            except ValueError as e:
-                print("Sorry map couldn't be loaded due to an error: ", e)
+            except Exception as e:
+                print("Sorry map couldn't be loaded for " + map_file + " due to an error: ", e)
     else:
         map_file = sys.argv[1]
         map_contents = gzip.open(map_file, 'rb').read()
