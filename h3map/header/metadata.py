@@ -15,7 +15,4 @@ def parse_header(parser):
     diff = parser.uint8()
     max_level = parser.uint8()
 
-    print("Version: ", version)
-    print("name: ", name)
-
-    return version
+    return version, name
