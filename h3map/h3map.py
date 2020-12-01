@@ -1,3 +1,4 @@
+import glob
 import gzip
 import struct
 import sys
@@ -201,6 +202,10 @@ class Parser:
         start, stop = self._next(1)
         return struct.unpack('B', self.buffer[start:stop])[0]
 
+    def uint16(self):
+        start, stop = self._next(4)
+        return struct.unpack('I', self.buffer[start:stop])[0]
+
     def uint32(self):
         start, stop = self._next(4)
         return struct.unpack('I', self.buffer[start:stop])[0]
@@ -236,40 +241,61 @@ def parse_header(parser):
     max_level = parser.uint8()
 
     print("Version: ", version)
-    print("any players: ", any_players)
-    print("height: ", height)
-    print("two level: ", two_level)
     print("name: ", name)
-    print("description: ", bytes.decode(desc, 'latin-1'))
-    print("difficulty: ", diff)
-    print("max hero level: ", max_level)
+
+    return version
 
 
-def get_allowed_factions(parser):
+def get_allowed_factions(parser, version):
     factions = ["castle", "rampart", "tower", "necropolis", "inferno", "dungeon", "stronghold", "fortress", "conflux",
                 "neutral"]
-    allowed = parser.uint8() + parser.uint8() * 256
-    return [faction for i, faction in enumerate(factions) if (allowed & (1 << i))]
+    total = parser.uint8()
+    allowed = total
+    if version != 14:
+        allowed = total + parser.uint8() * 256
+    else:
+        total -= 1
+    return [faction for i, faction in enumerate(factions[:total]) if (allowed & (1 << i))]
 
 
-def parse_player_info(parser):
+def parse_player_info(parser, version):
+    # INVALID = 0,
+    # // HEX
+    # DEC
+    # ROE = 0x0e, // 14
+    # AB = 0x15, // 21
+    # SOD = 0x1c, // 28
+    #
+    # // HOTA = 0x1e...
+    # 0x20 // 28...
+    # 30
+    # WOG = 0x33, // 51
+    # VCMI = 0xF0
     players = []
     for player_num in range(0, 8):
         can_human_play = parser.bool()
         can_computer_play = parser.bool()
         if not (can_human_play or can_computer_play):
-            parser.skip(13)
+            if version == 28 or version == 33:
+                parser.skip(13)
+            elif version == 21:
+                parser.skip(12)
+            elif version == 14:
+                parser.skip(6)
             continue
 
         ai_tactic = parser.uint8()
-        p7 = parser.uint8()
-        allowed_factions = get_allowed_factions(parser)
+        p7 = -1
+        if version == 28 or version == 33:
+            p7 = parser.uint8()
+        allowed_factions = get_allowed_factions(parser, version)
         is_faction_random = parser.bool()
         has_main_town = parser.bool()
 
         if has_main_town:
-            parser.bool()
-            parser.bool()
+            if version != 14:
+                parser.bool()
+                parser.bool()
             parser.uint8()
             parser.uint8()
             parser.uint8()
@@ -277,7 +303,7 @@ def parse_player_info(parser):
         has_random_hero = parser.bool()
         main_custom_hero_id = parser.uint8()
 
-        if main_custom_hero_id != 255:
+        if main_custom_hero_id != 255 and version != 14:
             _id = parser.uint8()
             name = parser.string()
 
@@ -286,10 +312,11 @@ def parse_player_info(parser):
         parser.skip(3)
 
         heroes = []
-        for i in range(0, hero_count):
-            _id = parser.uint8()
-            name = parser.string()
-            heroes.append(Hero(_id, name))
+        if version != 14:
+            for i in range(0, hero_count):
+                _id = parser.uint8()
+                name = parser.string()
+                heroes.append(Hero(_id, name))
 
         player = PlayerInfo(
             can_human_play,
@@ -418,22 +445,25 @@ def parse_allowed_heroes(parser, negate, limit):
 
 def main(map_contents):
     parser = Parser(map_contents)
-    parse_header(parser)
-    players = parse_player_info(parser)
-    print(players)
+    version = parse_header(parser)
+    players = parse_player_info(parser, version)
     win, loss = parse_victory_loss_condition(parser)
-    print(win)
-    print(loss)
     teams = parse_team_info(parser)
-    print(teams)
     allowed_heroes = parse_allowed_heroes(parser, False, len(heroes))
-    print(allowed_heroes)
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        raise ValueError("No map provided")
-
-    map_file = sys.argv[1]
-    map_contents = gzip.open(map_file, 'rb').read()
-    main(map_contents)
+        map_files = glob.glob("reference_maps/*.h3m")
+        print(map_files)
+        for map_file in map_files:
+            print(map_file)
+            map_contents = gzip.open(map_file, 'rb').read()
+            try:
+                main(map_contents)
+            except (ValueError, AssertionError, struct.error) as e:
+                print("Sorry map couldn't be loaded due to an error: ", e)
+    else:
+        map_file = sys.argv[1]
+        map_contents = gzip.open(map_file, 'rb').read()
+        main(map_contents)
