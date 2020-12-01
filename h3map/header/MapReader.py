@@ -1,0 +1,226 @@
+from abc import ABC
+
+from h3map.header.models import Header, Metadata, Version, MapProperties, Description, Difficulty, PlayerInfo, \
+    WhoCanPlay, AiType, FactionInfo, Hero
+
+from h3map.header.constants import heroes
+
+
+class MapReader(ABC):
+    def __init__(self, parser):
+        self.parser = parser
+        self.heroes = []
+        self.towns = []
+        self.limit = len(heroes)
+
+    def read(self):
+        metadata = self.read_metadata()
+        player_infos = self.read_player_infos()
+        teams, alliances = self.read_teams()
+        allowed_heroes = self.read_allowed_heroes()
+        conditions = self.read_victory_loss_condition()
+        return Header(metadata, player_infos, teams, alliances, allowed_heroes, conditions)
+
+    def read_metadata(self):
+        version = self.read_version()
+        map_props = self.read_map_properties()
+        description = self.read_description()
+        difficulty = self.read_difficulty()
+        return Metadata(version, map_props, description, difficulty)
+
+    def read_version(self):
+        return Version(self.version)
+
+    def read_map_properties(self):
+        any_players = self.parser.bool()
+        height = self.parser.uint32()
+        two_level = self.parser.bool()
+        return MapProperties(height, two_level, any_players)
+
+    def read_description(self):
+        name = self.parser.string()
+        desc = self.parser.string()
+        return Description(name, desc)
+
+    def read_difficulty(self):
+        diff = self.parser.uint8()
+        max_level = self.parser.uint8()
+        return Difficulty(diff, max_level)
+
+    def read_player_infos(self):
+        players = []
+        for player_num in range(0, 8):
+            who_can_play = self.read_who_can_play()
+            if who_can_play.nobody:
+                self.parser.skip(13)
+                continue
+
+            player = PlayerInfo(
+                self.read_ai_type(),
+                self.read_faction_info(),
+                self.read_town_info(),
+                self.read_hero_properties(),
+                self.read_heroes_belonging_to_player()
+            )
+
+            players.append(player)
+
+        return players
+
+    def read_who_can_play(self):
+        can_human_play = self.parser.bool()
+        can_computer_play = self.parser.bool()
+        return WhoCanPlay(can_human_play, can_computer_play)
+
+    def read_ai_type(self):
+        ai_tactic = self.parser.uint8()
+        _ = self.parser.uint8()
+        return AiType(ai_tactic)
+
+    def get_allowed_factions(self):
+        total = self.parser.uint8()
+        allowed = total + self.parser.uint8() * 256
+        return [faction for i, faction in enumerate(self.towns[:total]) if (allowed & (1 << i))]
+
+    def read_faction_info(self):
+        allowed_factions = self.get_allowed_factions()
+        is_faction_random = self.parser.bool()
+        return FactionInfo(allowed_factions, is_faction_random)
+
+    def read_town_info(self):
+        has_main_town = self.parser.bool()
+
+        if has_main_town:
+            self.parser.bool()
+            self.parser.bool()
+            self.parser.uint8()
+            self.parser.uint8()
+            self.parser.uint8()
+
+    def read_hero_properties(self):
+        has_random_hero = self.parser.bool()
+        main_custom_hero_id = self.parser.uint8()
+
+        if main_custom_hero_id != 255:
+            _id = self.parser.uint8()
+            name = self.parser.string()
+
+        return has_random_hero, main_custom_hero_id
+
+    def read_heroes_belonging_to_player(self):
+        _heroes = []
+        self.parser.uint8()
+        hero_count = self.parser.uint8()
+        self.parser.skip(3)
+
+        for i in range(0, hero_count):
+            _id = self.parser.uint8()
+            name = self.parser.string()
+            _heroes.append(Hero(_id, name))
+
+        return _heroes
+
+    def read_teams(self):
+        alliances = True
+        number_of_teams = self.parser.uint8()
+        teams = []
+        if number_of_teams > 0:
+            for player in range(0, 8):
+                team_id = self.parser.uint8()
+                teams.append(team_id)
+        else:
+            alliances = False
+            for player in range(0, 8):
+                # TODO: Exclude single player teams if they can't be played
+                # if can_computer_play or can_human_play:
+                team_id = self.parser.uint8()
+                teams.append(team_id)
+
+        return teams, alliances
+
+    def read_allowed_heroes(self):
+        negate = False
+        allowed_heroes = [True] * self.limit
+        for byte in range(0, 20):
+            allowed = self.parser.uint8()
+            for bit in range(0, 8):
+                if byte * 8 + bit < self.limit:
+                    flag = allowed & (1 << bit)
+                    if (negate & flag) or ((not negate) & (not flag)):
+                        allowed_heroes.insert(byte * 8 + bit, False)
+
+        return [hero for i, hero in enumerate(self.heroes) if allowed_heroes[i]]
+
+    def read_victory_loss_condition(self):
+        return self._determine_winning_condition(), self._determine_loss_condition()
+
+    def _determine_loss_condition(self):
+        loss_conditions = [
+            "LOSSCASTLE",
+            "LOSSHERO",
+            "TIMEEXPIRES",
+            "LOSSSTANDARD",
+        ]
+
+        loss = self.parser.uint8()
+        if 3 < loss <= 255:
+            return loss_conditions[-1]
+
+        if loss == 0 or loss == 1:
+            self.parser.uint8()
+            self.parser.uint8()
+            self.parser.uint8()
+        elif loss == 3:
+            self.parser.uint16()
+        elif loss > 3:
+            raise ValueError("Loss condition not found: ", loss)
+
+        return loss_conditions[loss]
+
+    def _determine_winning_condition(self):
+        _conditions = [
+            "ARTIFACT",
+            "GATHERTROOP",
+            "GATHERRESOURCE",
+            "BUILDCITY",
+            "BUILDGRAIL",
+            "BEATHERO",
+            "CAPTURECITY",
+            "BEATMONSTER",
+            "TAKEDWELLINGS",
+            "TAKEMINES",
+            "TRANSPORTITEM",
+            "WINSTANDARD",
+        ]
+
+        _condition = self.parser.uint8()
+        if 10 < _condition <= 255:
+            return _conditions[-1]
+
+        allow_normal_victory = self.parser.bool()
+        applies_to_ai = self.parser.bool()
+
+        if _condition == 0:
+            self.parser.uint8()
+            self.parser.skip(1)
+        elif _condition == 1:
+            self.parser.uint8()
+            self.parser.skip(1)
+            self.parser.uint32()
+        elif _condition == 2:
+            self.parser.uint8()
+            self.parser.uint32()
+        elif _condition == 3:
+            self.parser.uint8()
+            self.parser.uint8()
+            self.parser.uint8()
+            self.parser.uint8()
+            self.parser.uint8()
+        elif (4 <= _condition <= 7) or _condition == 10:
+            self.parser.uint8()
+            self.parser.uint8()
+            self.parser.uint8()
+        elif _condition > 10:
+            raise ValueError("Winning condition not found: ", _condition)
+
+        return _conditions[_condition]

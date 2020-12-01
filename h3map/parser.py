@@ -1,5 +1,6 @@
 import struct
 
+
 class Parser:
     def __init__(self, buffer):
         self.buffer = buffer

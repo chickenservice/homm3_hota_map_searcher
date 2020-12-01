@@ -4,14 +4,14 @@ import gzip
 import click
 
 from h3map.parser import Parser
-import h3map.header.Reader as Reader
+from h3map.header.versions import supported_versions
 
 
 def parse(map_contents):
     parser = Parser(map_contents)
-    reader = Reader.Reader(parser)
+    version = parser.uint32()
+    reader = supported_versions[version](parser)
     header = reader.read()
-
     return header
 
 
@@ -55,7 +55,7 @@ def list_maps(files, detailed):
         if detailed:
             print(j)
         else:
-            print(j.metadata.name)
+            print(j.metadata.description.name)
 
     print("Loaded {0} maps".format(len(maps)))
 

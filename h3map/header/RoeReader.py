@@ -1,106 +1,88 @@
-from dataclasses import dataclass
+import abc
 
-from h3map.header.models.nodes import Metadata, Hero, PlayerInfo
+from h3map.header.MapReader import MapReader
+from h3map.header.models import PlayerInfo
 
-
-@dataclass
-class RoeMetadata(Metadata):
-    version: int
-    any_players: bool
-    size: int
-    two_levels: bool
-    name: str
-    description: str
-    difficulty: int
-    max_level: int
+from h3map.header.models import AiType, FactionInfo
+from h3map.header.models import HeroInfo, TownInfo
 
 
-class RoeReader:
-    factions = ["castle",
-                "rampart",
-                "tower",
-                "necropolis",
-                "inferno",
-                "dungeon",
-                "stronghold",
-                "fortress",
-                "neutral"]
+class HeroProperties(object):
+    pass
 
+
+class RoeReader(MapReader):
     def __init__(self, parser, version=14):
         self.version = version
         self.parser = parser
+        self.towns = factions
+        super().__init__(parser)
 
-    def read(self):
-        metadata = self._read_metadata()
-        player_info = self._read_player_info()
-        return metadata, player_info
-
-    def _read_metadata(self):
-        any_players = self.parser.bool()
-        height = self.parser.uint32()
-        two_level = self.parser.bool()
-        name = self.parser.string()
-        desc = self.parser.string()
-        diff = self.parser.uint8()
-        max_level = self.parser.uint8()
-
-        return RoeMetadata(self.version, any_players, height, two_level, name, desc, diff, max_level)
-
-    def _read_player_info(self):
+    def read_player_infos(self):
         players = []
         for player_num in range(0, 8):
-            can_human_play = self.parser.bool()
-            can_computer_play = self.parser.bool()
-            if not (can_human_play or can_computer_play):
+            who_can_play = self.read_who_can_play()
+            if who_can_play.nobody:
                 self.parser.skip(6)
                 continue
 
-            ai_tactic = self.parser.uint8()
-            allowed_factions = self._get_allowed_factions()
-            is_faction_random = self.parser.bool()
-            has_main_town = self.parser.bool()
+            ai = self.read_ai_type(),
+            faction = self.read_faction_info(),
+            hero = self.read_hero_properties(),
+            town = self.read_town_info(),
+            heroes = self.read_heroes_belonging_to_player(town, hero)
 
-            if has_main_town:
-                self.parser.uint8()
-                self.parser.uint8()
-                self.parser.uint8()
-
-            has_random_hero = self.parser.bool()
-            main_custom_hero_id = self.parser.uint8()
-
-            # TODO: Add proper handling for different ROE extensions:
-            # https://github.com/potmdehex/homm3tools/blob/h3mlibhota/h3m/h3mlib/h3m_parsing/parse_players.c
-            if has_main_town and main_custom_hero_id != 255:
-                _id = self.parser.uint8()
-            elif not has_main_town and main_custom_hero_id != 255:
-                _id = self.parser.uint8()
-
-            _heroes = []
-            p7 = -1
-            player = PlayerInfo(
-                can_human_play,
-                can_computer_play,
-                ai_tactic,
-                allowed_factions,
-                p7,
-                is_faction_random,
-                has_main_town,
-                has_random_hero,
-                _heroes
-            )
-
+            player = PlayerInfo(ai, faction, hero, town, heroes)
             players.append(player)
 
         return players
 
-    def _read_teams(self):
-        pass
+    def read_ai_type(self):
+        ai_tactic = self.parser.uint8()
+        return AiType(ai_tactic)
 
-    def _read_allowed_heroes(self):
-        pass
+    def read_faction_info(self):
+        allowed_factions = self.get_allowed_factions()
+        is_faction_random = self.parser.bool()
+        return FactionInfo(allowed_factions, is_faction_random)
 
-    def _get_allowed_factions(self):
+    def read_town_info(self):
+        has_main_town = self.parser.bool()
+
+        if has_main_town:
+            self.parser.uint8()
+            self.parser.uint8()
+            self.parser.uint8()
+
+        return TownInfo(has_main_town)
+
+    def read_heroes_belonging_to_player(self, town_info, hero_type):
+        if town_info and hero_type != 255:
+            _id = self.parser.uint8()
+        elif not town_info and hero_type != 255:
+            _id = self.parser.uint8()
+
+    def read_hero_properties(self):
+        has_random_hero = self.parser.bool()
+        hero_type = self.parser.uint8()
+        return HeroInfo(has_random_hero, hero_type)
+
+    def get_allowed_factions(self):
         total = self.parser.uint8()
         allowed = max(total - 1, 0)
-        return [faction for i, faction in enumerate(self.factions[:total]) if (allowed & (1 << i))]
+        return [faction for i, faction in enumerate(self.towns[:total]) if (allowed & (1 << i))]
+
+    def __repr__(self):
+        return "Restoration of Erathia"
+
+
+factions = ["castle",
+            "rampart",
+            "tower",
+            "necropolis",
+            "inferno",
+            "dungeon",
+            "stronghold",
+            "fortress",
+            "neutral"]
 
