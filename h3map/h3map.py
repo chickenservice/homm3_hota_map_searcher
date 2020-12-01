@@ -352,7 +352,7 @@ def determine_loss_condition(parser):
     ]
 
     loss = parser.uint8()
-    if loss == 255:
+    if 3 < loss <= 255:
         return loss_conditions[-1]
 
     if loss == 0 or loss == 1:
@@ -361,8 +361,8 @@ def determine_loss_condition(parser):
         parser.uint8()
     elif loss == 3:
         parser.uint16()
-    else:
-        raise ValueError("Loss condition not found")
+    elif loss > 3:
+        raise ValueError("Loss condition not found: ", loss)
 
     return loss_conditions[loss]
 
@@ -384,7 +384,7 @@ def determine_winning_condition(parser):
     ]
 
     _condition = parser.uint8()
-    if _condition == 255:
+    if 10 < _condition <= 255:
         return _conditions[-1]
 
     allow_normal_victory = parser.bool()
@@ -410,8 +410,8 @@ def determine_winning_condition(parser):
         parser.uint8()
         parser.uint8()
         parser.uint8()
-    else:
-        raise ValueError("Winning condition not found.")
+    elif _condition > 10:
+        raise ValueError("Winning condition not found: ", _condition)
 
     return _conditions[_condition]
 
@@ -463,9 +463,7 @@ def main(map_contents):
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         map_files = glob.glob("reference_maps/*.h3m")
-        print(map_files)
         for map_file in map_files:
-            print(map_file)
             map_contents = gzip.open(map_file, 'rb').read()
             try:
                 main(map_contents)
