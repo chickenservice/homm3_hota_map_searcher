@@ -16,9 +16,9 @@ class MapReader(ABC):
     def read(self):
         metadata = self.read_metadata()
         player_infos = self.read_player_infos()
+        conditions = self.read_victory_loss_condition()
         team_setup = self.read_teams()
         allowed_heroes = self.read_allowed_heroes()
-        conditions = self.read_victory_loss_condition()
         return Header(metadata, player_infos, team_setup, allowed_heroes, conditions)
 
     def read_metadata(self):
