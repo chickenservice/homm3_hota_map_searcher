@@ -18,7 +18,7 @@ def parse(map_contents):
 def load(files):
     maps = {}
     if not len(files):
-        files = glob.glob("reference_maps/" + "*.h3m")
+        files = glob.glob("*.h3m")
     for i, map_file in enumerate(files):
         map_contents = gzip.open(map_file, 'rb').read()
         try:

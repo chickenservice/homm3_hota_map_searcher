@@ -64,6 +64,16 @@ class FactionInfo(ABC):
 
 
 @dataclass
+class TeamSetup(ABC):
+    number_of_teams: int
+    teams: List[int]
+
+    @property
+    def alliance_possible(self):
+        return self.number_of_teams > 0
+
+
+@dataclass
 class Metadata(ABC):
     version: Version
     properties: MapProperties
@@ -105,8 +115,7 @@ class WhoCanPlay(ABC):
 class Header(ABC):
     metadata: Metadata
     players_info: List[PlayerInfo]
-    teams: List[str]
-    alliances: bool
+    teams: TeamSetup
     allowed_heroes: List[str]
     conditions: List[str]
 

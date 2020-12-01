@@ -1,7 +1,7 @@
 from abc import ABC
 
 from h3map.header.models import Header, Metadata, Version, MapProperties, Description, Difficulty, PlayerInfo, \
-    WhoCanPlay, AiType, FactionInfo, Hero
+    WhoCanPlay, AiType, FactionInfo, Hero, TeamSetup
 
 from h3map.header.constants import heroes
 
@@ -16,10 +16,10 @@ class MapReader(ABC):
     def read(self):
         metadata = self.read_metadata()
         player_infos = self.read_player_infos()
-        teams, alliances = self.read_teams()
+        team_setup = self.read_teams()
         allowed_heroes = self.read_allowed_heroes()
         conditions = self.read_victory_loss_condition()
-        return Header(metadata, player_infos, teams, alliances, allowed_heroes, conditions)
+        return Header(metadata, player_infos, team_setup, allowed_heroes, conditions)
 
     def read_metadata(self):
         version = self.read_version()
@@ -121,22 +121,13 @@ class MapReader(ABC):
         return _heroes
 
     def read_teams(self):
-        alliances = True
         number_of_teams = self.parser.uint8()
         teams = []
-        if number_of_teams > 0:
-            for player in range(0, 8):
-                team_id = self.parser.uint8()
-                teams.append(team_id)
-        else:
-            alliances = False
-            for player in range(0, 8):
-                # TODO: Exclude single player teams if they can't be played
-                # if can_computer_play or can_human_play:
-                team_id = self.parser.uint8()
-                teams.append(team_id)
+        for player in range(0, 8):
+            team_id = self.parser.uint8()
+            teams.append(team_id)
 
-        return teams, alliances
+        return TeamSetup(number_of_teams, teams)
 
     def read_allowed_heroes(self):
         negate = False
