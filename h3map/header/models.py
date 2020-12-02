@@ -72,6 +72,13 @@ class TeamSetup(ABC):
     def alliance_possible(self):
         return self.number_of_teams > 0
 
+    def __repr__(self):
+        string = "Number of teams: {0}\n".format(self.number_of_teams)
+        for team in self.teams:
+            string += "Team {0}\n".format(team)
+
+        return string
+
 
 @dataclass
 class Metadata(ABC):
@@ -112,7 +119,12 @@ class WhoCanPlay(ABC):
 
 
 @dataclass
-class LossCondition(ABC):
+class Condition(ABC):
+    pass
+
+
+@dataclass
+class LossCondition(Condition):
     pass
 
 
@@ -153,7 +165,7 @@ class TimeExpires(LossCondition):
 
 
 @dataclass
-class WinningCondition(ABC):
+class WinningCondition(Condition):
     allow_standard_win: bool
     can_ai_reach_artifact: bool
 
@@ -271,7 +283,12 @@ class Header(ABC):
     players_info: List[PlayerInfo]
     teams: TeamSetup
     allowed_heroes: List[str]
-    conditions: List[str]
+    conditions: List[Condition]
 
     def __repr__(self):
-        return "{0}\n".format(self.metadata)
+        string = "{0}\n".format(self.metadata)
+        string += "{0}\n".format(self.teams)
+        for condition in self.conditions:
+            string += "Condition: {0}\n".format(condition)
+
+        return string

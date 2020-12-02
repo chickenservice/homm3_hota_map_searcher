@@ -149,14 +149,14 @@ class MapReader(ABC):
         return self.read_winning_condition(), self.read_loss_condition()
 
     def read_loss_condition(self):
+        condition_reader = self._read_loss_condition()
+        return condition_reader.read()
+
+    def _read_loss_condition(self):
         condition = self.parser.uint8()
         if condition not in loss_condition_readers:
             return StandardLossConditionReader()
         return loss_condition_readers[condition](self.parser)
-
-    def _read_loss_condition(self):
-        condition_reader = self.read_loss_condition()
-        return condition_reader.read()
 
     def read_winning_condition(self):
         winning_reader = self._read_winning_condition()
