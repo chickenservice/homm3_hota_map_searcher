@@ -112,6 +112,160 @@ class WhoCanPlay(ABC):
 
 
 @dataclass
+class LossCondition(ABC):
+    pass
+
+
+@dataclass()
+class StandardLossCondition(LossCondition):
+    number: int
+
+    def __repr__(self):
+        return "Standard loss condition"
+
+
+@dataclass
+class LoseSpecificTown(LossCondition):
+    x: int
+    y: int
+    z: int
+
+    def __repr__(self):
+        return "Lose a specific town"
+
+
+@dataclass
+class LoseSpecificHero(LossCondition):
+    x: int
+    y: int
+    z: int
+
+    def __repr__(self):
+        return "Lose a specific hero"
+
+
+@dataclass()
+class TimeExpires(LossCondition):
+    days: int
+
+    def __repr__(self):
+        return "Lose on time"
+
+
+@dataclass
+class WinningCondition(ABC):
+    allow_standard_win: bool
+    can_ai_reach_artifact: bool
+
+
+@dataclass
+class StandardWinningCondition(WinningCondition):
+    def __repr__(self):
+        return "Standard winning condition"
+
+
+@dataclass
+class AcquireSpecificArtifact(WinningCondition):
+    artifact_code: bool
+
+    def __repr__(self):
+        return "Acquire a specific artifact"
+
+
+@dataclass
+class AccumulateCreatures(WinningCondition):
+    unit_code: int
+    amount: int
+
+    def __repr__(self):
+        return "Accumulate creatures"
+
+
+@dataclass
+class AccumulateResources(WinningCondition):
+    resource_code: int
+    amount: int
+
+    def __repr__(self):
+        return "Accumulate resources"
+
+
+@dataclass
+class UpgradeSpecificTown(WinningCondition):
+    x: int
+    y: int
+    z: int
+    hall_level: int
+    castle_level: int
+
+    def __repr__(self):
+        return "Upgrade a specific town"
+
+
+@dataclass
+class BuildGrailStructure(WinningCondition):
+    x: int
+    y: int
+    z: int
+
+    def __repr__(self):
+        return "Build the grail structure"
+
+
+@dataclass
+class DefeatSpecificHero(WinningCondition):
+    x: int
+    y: int
+    z: int
+
+    def __repr__(self):
+        return "Defeat specific hero"
+
+
+@dataclass
+class CaptureSpecificTown(WinningCondition):
+    x: int
+    y: int
+    z: int
+
+    def __repr__(self):
+        return "Capture a specific town"
+
+
+@dataclass
+class DefeatSpecificMonster(WinningCondition):
+    x: int
+    y: int
+    z: int
+
+    def __repr__(self):
+        return "Defeat specific monster"
+
+
+@dataclass
+class FlagAllCreatures(WinningCondition):
+    def __repr__(self):
+        return "Flag all creature dwellings"
+
+
+@dataclass
+class FlagAllMines(WinningCondition):
+    def __repr__(self):
+        return "Flag all mines"
+
+
+@dataclass
+class TransportSpecificArtifact(WinningCondition):
+    artifact_code: int
+    x: int
+    y: int
+    z: int
+
+    def __repr__(self):
+        return "Transport a specific item"
+
+
+@dataclass
 class Header(ABC):
     metadata: Metadata
     players_info: List[PlayerInfo]

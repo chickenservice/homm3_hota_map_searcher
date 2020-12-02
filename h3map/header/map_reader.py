@@ -1,7 +1,10 @@
 from abc import ABC
 
+from h3map.header.conditions_readers.loss_conditions import loss_condition_readers, StandardLossConditionReader
+from h3map.header.conditions_readers.winning_conditions import StandardWinningConditionReader, winning_condition_readers
 from h3map.header.models import Header, Metadata, Version, MapProperties, Description, Difficulty, PlayerInfo, \
-    WhoCanPlay, AiType, FactionInfo, Hero, TeamSetup
+    WhoCanPlay, AiType, FactionInfo, Hero, TeamSetup, StandardLossCondition, LoseSpecificTown, \
+    LoseSpecificHero, TimeExpires
 
 from h3map.header.constants import heroes
 
@@ -143,75 +146,26 @@ class MapReader(ABC):
         return [hero for i, hero in enumerate(self.heroes) if allowed_heroes[i]]
 
     def read_victory_loss_condition(self):
-        return self._determine_winning_condition(), self._determine_loss_condition()
+        return self.read_winning_condition(), self.read_loss_condition()
 
-    def _determine_loss_condition(self):
-        loss_conditions = [
-            "LOSSCASTLE",
-            "LOSSHERO",
-            "TIMEEXPIRES",
-            "LOSSSTANDARD",
-        ]
+    def read_loss_condition(self):
+        condition = self.parser.uint8()
+        if condition not in loss_condition_readers:
+            return StandardLossConditionReader()
+        return loss_condition_readers[condition](self.parser)
 
-        loss = self.parser.uint8()
-        if 3 < loss <= 255:
-            return loss_conditions[-1]
+    def _read_loss_condition(self):
+        condition_reader = self.read_loss_condition()
+        return condition_reader.read()
 
-        if loss == 0 or loss == 1:
-            self.parser.uint8()
-            self.parser.uint8()
-            self.parser.uint8()
-        elif loss == 3:
-            self.parser.uint16()
-        elif loss > 3:
-            raise ValueError("Loss condition not found: ", loss)
+    def read_winning_condition(self):
+        winning_reader = self._read_winning_condition()
+        return winning_reader.read()
 
-        return loss_conditions[loss]
+    def _read_winning_condition(self):
+        condition = self.parser.uint8()
+        if condition not in winning_condition_readers:
+            return StandardWinningConditionReader(self.parser)
 
-    def _determine_winning_condition(self):
-        _conditions = [
-            "ARTIFACT",
-            "GATHERTROOP",
-            "GATHERRESOURCE",
-            "BUILDCITY",
-            "BUILDGRAIL",
-            "BEATHERO",
-            "CAPTURECITY",
-            "BEATMONSTER",
-            "TAKEDWELLINGS",
-            "TAKEMINES",
-            "TRANSPORTITEM",
-            "WINSTANDARD",
-        ]
+        return winning_condition_readers[condition](self.parser)
 
-        _condition = self.parser.uint8()
-        if 10 < _condition <= 255:
-            return _conditions[-1]
-
-        allow_normal_victory = self.parser.bool()
-        applies_to_ai = self.parser.bool()
-
-        if _condition == 0:
-            self.parser.uint8()
-            self.parser.skip(1)
-        elif _condition == 1:
-            self.parser.uint8()
-            self.parser.skip(1)
-            self.parser.uint32()
-        elif _condition == 2:
-            self.parser.uint8()
-            self.parser.uint32()
-        elif _condition == 3:
-            self.parser.uint8()
-            self.parser.uint8()
-            self.parser.uint8()
-            self.parser.uint8()
-            self.parser.uint8()
-        elif (4 <= _condition <= 7) or _condition == 10:
-            self.parser.uint8()
-            self.parser.uint8()
-            self.parser.uint8()
-        elif _condition > 10:
-            raise ValueError("Winning condition not found: ", _condition)
-
-        return _conditions[_condition]
