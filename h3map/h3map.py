@@ -42,7 +42,7 @@ def filter(files, size):
     sizes = {"XL": 144}
     maps = load(files)
     for i, j in maps.items():
-        if j == sizes[size]:
+        if j.metadata.properties.size == sizes[size]:
             print(i)
 
 
