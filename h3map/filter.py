@@ -4,7 +4,7 @@ from typing import List
 from h3map.header.models import Header, AcquireSpecificArtifact, TransportSpecificArtifact, FlagAllMines, \
     AccumulateCreatures, AccumulateResources, UpgradeSpecificTown, BuildGrailStructure, DefeatSpecificHero, \
     CaptureSpecificTown, DefeatSpecificMonster, FlagAllCreatures, Condition, TimeExpires, LoseSpecificHero, \
-    LoseSpecificTown
+    LoseSpecificTown, StandardWinningCondition, StandardLossCondition
 
 
 class FilterStrategy(abc.ABC):
@@ -79,6 +79,7 @@ class MapSizeFilter(FilterStrategy):
 class WinLossConditionFilter(FilterStrategy):
     _conditions = {
         # Win conditions
+        "Standard win": StandardWinningCondition,
         "Acquire artifact": AcquireSpecificArtifact,
         "Accumulate creatures": AccumulateCreatures,
         "Accumulate resources": AccumulateResources,
@@ -92,6 +93,7 @@ class WinLossConditionFilter(FilterStrategy):
         "Transport artifact": TransportSpecificArtifact,
 
         # Loss conditions
+        "Standard loss": StandardLossCondition,
         "Lose town": LoseSpecificTown,
         "Lose hero": LoseSpecificHero,
         "Time expires": TimeExpires,
