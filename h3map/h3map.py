@@ -3,7 +3,7 @@ import gzip
 
 import cli_ui
 import click
-from click import BadParameter, UsageError
+from click import UsageError
 
 from h3map.cli import ListDetailed, List
 from h3map.filter import HeaderFilter
@@ -23,8 +23,9 @@ def load(files):
     maps = {}
     if not len(files):
         files = glob.glob("*.h3m")
+    cli_ui.info(cli_ui.bold, "Querying {0} maps".format((len(files))))
+    print()
     for i, map_file in enumerate(files):
-        cli_ui.info_count(i, len(files), "maps loaded")
         map_contents = gzip.open(map_file, 'rb').read()
         try:
             header = parse(map_contents)
@@ -71,4 +72,4 @@ def list_maps(files, size, teams, team_players, win, loss, detailed):
     view = (ListDetailed() if detailed else List())
     view.show(filtered)
 
-    cli_ui.info_1("\nFound {0} maps".format(len(filtered)))
+    cli_ui.info(cli_ui.bold, cli_ui.green, "\nFound {0} matching maps".format(len(filtered)))
