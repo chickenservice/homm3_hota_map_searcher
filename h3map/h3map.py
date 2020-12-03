@@ -36,8 +36,7 @@ def load(files):
 @click.option('--detailed', is_flag=True)
 @click.pass_context
 def h3map(ctx, detailed):
-
-    ctx.obj = ListDetailed() if detailed is not None else List()
+    ctx.obj = (ListDetailed() if detailed else List())
 
 
 @h3map.command()
@@ -46,9 +45,8 @@ def h3map(ctx, detailed):
 @click.option('--teams', default=None)
 @click.option('--win', default=None)
 @click.option('--loss', default=None)
-@click.option('--detailed', is_flag=True)
 @click.pass_context
-def filter(ctx, detailed, files, size, teams, win, loss):
+def filter(ctx, files, size, teams, win, loss):
     maps = load(files)
 
     header_filter = HeaderFilter()
@@ -68,9 +66,8 @@ def filter(ctx, detailed, files, size, teams, win, loss):
 
 @h3map.command(name="list")
 @click.argument('files', nargs=-1, type=click.Path())
-@click.option('--detailed', is_flag=True)
 @click.pass_context
-def list_maps(ctx, files, detailed):
+def list_maps(ctx, files):
     maps = load(files)
     ctx.obj.show(maps.values())
 
