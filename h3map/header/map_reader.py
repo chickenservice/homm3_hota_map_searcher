@@ -1,12 +1,13 @@
 from abc import ABC
 
+import h3map
 from h3map.header.conditions_readers.loss_conditions import loss_condition_readers, StandardLossConditionReader
 from h3map.header.conditions_readers.winning_conditions import StandardWinningConditionReader, winning_condition_readers
 from h3map.header.models import Header, Metadata, Version, MapProperties, Description, Difficulty, PlayerInfo, \
-    WhoCanPlay, AiType, FactionInfo, Hero, TeamSetup, StandardLossCondition, LoseSpecificTown, \
-    LoseSpecificHero, TimeExpires
+    WhoCanPlay, AiType, FactionInfo, Hero, TeamSetup
 
 from h3map.header.constants import heroes
+from h3map.parser import Parser
 
 
 class MapReader(ABC):
@@ -15,6 +16,14 @@ class MapReader(ABC):
         self.heroes = []
         self.towns = []
         self.limit = len(heroes)
+
+    @classmethod
+    def parse(cls, map_contents):
+        parser = Parser(map_contents)
+        version = parser.uint32()
+        reader = h3map.header.versions.supported_versions[version](parser)
+        header = reader.read()
+        return header
 
     def read(self):
         metadata = self.read_metadata()
