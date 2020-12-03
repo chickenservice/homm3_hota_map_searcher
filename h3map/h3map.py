@@ -1,7 +1,9 @@
 import glob
 import gzip
 
+import cli_ui
 import click
+from click import BadParameter, UsageError
 
 from h3map.cli import ListDetailed, List
 from h3map.filter import HeaderFilter
@@ -22,6 +24,7 @@ def load(files):
     if not len(files):
         files = glob.glob("*.h3m")
     for i, map_file in enumerate(files):
+        cli_ui.info_count(i, len(files), "maps loaded")
         map_contents = gzip.open(map_file, 'rb').read()
         try:
             header = parse(map_contents)
@@ -59,7 +62,7 @@ def list_maps(files, size, teams, team_players, win, loss, detailed):
         header_filter.has_win_or_loss_condition(loss)
     if team_players is not None:
         if teams is None:
-            raise ValueError("Cannot specify number of players per team without number of teams.")
+            raise UsageError("Cannot specify number of players per team without number of teams.")
 
         header_filter.team_has_players(int(team_players))
 
@@ -68,4 +71,4 @@ def list_maps(files, size, teams, team_players, win, loss, detailed):
     view = (ListDetailed() if detailed else List())
     view.show(filtered)
 
-    print("\nFound {0} maps".format(len(filtered)))
+    cli_ui.info_1("\nFound {0} maps".format(len(filtered)))

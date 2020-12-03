@@ -1,5 +1,7 @@
 import abc
 
+import cli_ui
+
 
 class CliView(abc.ABC):
     @abc.abstractmethod
@@ -16,4 +18,8 @@ class List(CliView):
 class ListDetailed(CliView):
     def show(self, headers):
         for header in headers:
-            print(header)
+            cli_ui.info_section(header.metadata.description.name.decode('latin-1'))
+            cli_ui.info(header.metadata.description.summary.decode('latin-1'))
+            print('\n')
+            cli_ui.info(header.teams)
+            print('\n\n')
