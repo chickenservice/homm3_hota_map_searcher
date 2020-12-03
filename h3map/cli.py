@@ -22,4 +22,3 @@ class ListDetailed(CliView):
             cli_ui.info(header.metadata.description.summary.decode('latin-1'))
             print('\n')
             cli_ui.info(header.teams)
-            print('\n\n')
