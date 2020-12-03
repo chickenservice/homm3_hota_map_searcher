@@ -37,7 +37,7 @@ def h3map():
     pass
 
 
-@h3map.command()
+@h3map.command(name="list")
 @click.argument('files', nargs=-1, type=click.Path())
 @click.option('--size', default=None)
 @click.option('--teams', default=None)
@@ -45,7 +45,7 @@ def h3map():
 @click.option('--win', default=None)
 @click.option('--loss', default=None)
 @click.option('--detailed', is_flag=True)
-def filter(files, size, teams, team_players, win, loss, detailed):
+def list_maps(files, size, teams, team_players, win, loss, detailed):
     maps = load(files)
 
     header_filter = HeaderFilter()
@@ -69,15 +69,3 @@ def filter(files, size, teams, team_players, win, loss, detailed):
     view.show(filtered)
 
     print("\nFound {0} maps".format(len(filtered)))
-
-
-@h3map.command(name="list")
-@click.argument('files', nargs=-1, type=click.Path())
-@click.option('--detailed', is_flag=True)
-def list_maps(files, detailed):
-    maps = load(files)
-
-    view = (ListDetailed() if detailed else List())
-    view.show(maps.values())
-
-    print("Loaded {0} maps".format(len(maps)))
