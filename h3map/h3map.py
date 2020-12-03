@@ -33,20 +33,19 @@ def load(files):
 
 
 @click.group()
-@click.option('--detailed', is_flag=True)
-@click.pass_context
-def h3map(ctx, detailed):
-    ctx.obj = (ListDetailed() if detailed else List())
+def h3map():
+    pass
 
 
 @h3map.command()
 @click.argument('files', nargs=-1, type=click.Path())
-@click.option('--size', default="XL")
+@click.option('--size', default=None)
 @click.option('--teams', default=None)
+@click.option('--team-players', nargs=1, default=None)
 @click.option('--win', default=None)
 @click.option('--loss', default=None)
-@click.pass_context
-def filter(ctx, files, size, teams, win, loss):
+@click.option('--detailed', is_flag=True)
+def filter(files, size, teams, team_players, win, loss, detailed):
     maps = load(files)
 
     header_filter = HeaderFilter()
@@ -58,17 +57,27 @@ def filter(ctx, files, size, teams, win, loss):
         header_filter.has_win_or_loss_condition(win)
     if loss is not None:
         header_filter.has_win_or_loss_condition(loss)
+    if team_players is not None:
+        if teams is None:
+            raise ValueError("Cannot specify number of players per team without number of teams.")
+
+        header_filter.team_has_players(int(team_players))
 
     filtered = header_filter.apply(maps.values())
 
-    ctx.obj.show(filtered)
+    view = (ListDetailed() if detailed else List())
+    view.show(filtered)
+
+    print("\nFound {0} maps".format(len(filtered)))
 
 
 @h3map.command(name="list")
 @click.argument('files', nargs=-1, type=click.Path())
-@click.pass_context
-def list_maps(ctx, files):
+@click.option('--detailed', is_flag=True)
+def list_maps(files, detailed):
     maps = load(files)
-    ctx.obj.show(maps.values())
+
+    view = (ListDetailed() if detailed else List())
+    view.show(maps.values())
 
     print("Loaded {0} maps".format(len(maps)))

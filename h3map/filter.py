@@ -33,6 +33,10 @@ class HeaderFilter:
         winning_condition = WinLossConditionFilter(condition)
         self._add_filter(winning_condition)
 
+    def team_has_players(self, players):
+        players_per_team = TeamPlayerNumberFilter(players)
+        self._add_filter(players_per_team)
+
     def apply(self, headers: List[Header]):
         _headers = headers
         for _filter in self.filters:
@@ -53,6 +57,18 @@ class TeamSizeFilter(FilterStrategy):
 
     def _has_teams(self, header):
         return header.teams.number_of_teams == self.size
+
+
+class TeamPlayerNumberFilter(FilterStrategy):
+    def __init__(self, players):
+        self.players = players
+
+    def filter(self, headers: List[Header]):
+        return [header for header in headers if self._has_players(header)]
+
+    def _has_players(self, header):
+        from itertools import groupby
+        return any([len(list(list(team)[1])) == self.players for team in groupby(sorted(header.teams.teams))])
 
 
 class MapSizeFilter(FilterStrategy):
