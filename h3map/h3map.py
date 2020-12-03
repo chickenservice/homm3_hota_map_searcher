@@ -56,6 +56,10 @@ def filter(ctx, detailed, files, size, teams, win, loss):
         header_filter.has_map_size(size)
     if teams is not None:
         header_filter.has_team_size(int(teams))
+    if win is not None:
+        header_filter.has_win_or_loss_condition(win)
+    if loss is not None:
+        header_filter.has_win_or_loss_condition(loss)
 
     filtered = header_filter.apply(maps.values())
 

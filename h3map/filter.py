@@ -1,7 +1,10 @@
 import abc
 from typing import List
 
-from h3map.header.models import Header
+from h3map.header.models import Header, AcquireSpecificArtifact, TransportSpecificArtifact, FlagAllMines, \
+    AccumulateCreatures, AccumulateResources, UpgradeSpecificTown, BuildGrailStructure, DefeatSpecificHero, \
+    CaptureSpecificTown, DefeatSpecificMonster, FlagAllCreatures, Condition, TimeExpires, LoseSpecificHero, \
+    LoseSpecificTown
 
 
 class FilterStrategy(abc.ABC):
@@ -25,6 +28,10 @@ class HeaderFilter:
     def alliances_possible(self):
         team_size = TeamSizeFilter(2)
         self._add_filter(team_size)
+
+    def has_win_or_loss_condition(self, condition):
+        winning_condition = WinLossConditionFilter(condition)
+        self._add_filter(winning_condition)
 
     def apply(self, headers: List[Header]):
         _headers = headers
@@ -67,3 +74,37 @@ class MapSizeFilter(FilterStrategy):
 
     def _has_size(self, header):
         return header.metadata.properties.size == self.size
+
+
+class WinLossConditionFilter(FilterStrategy):
+    _conditions = {
+        # Win conditions
+        "Acquire artifact": AcquireSpecificArtifact,
+        "Accumulate creatures": AccumulateCreatures,
+        "Accumulate resources": AccumulateResources,
+        "Upgrade town": UpgradeSpecificTown,
+        "Build grail": BuildGrailStructure,
+        "Defeat hero": DefeatSpecificHero,
+        "Capture town": CaptureSpecificTown,
+        "Defeat monster": DefeatSpecificMonster,
+        "Flag creatures": FlagAllCreatures,
+        "Flag mines": FlagAllMines,
+        "Transport artifact": TransportSpecificArtifact,
+
+        # Loss conditions
+        "Lose town": LoseSpecificTown,
+        "Lose hero": LoseSpecificHero,
+        "Time expires": TimeExpires,
+    }
+
+    def __init__(self, condition):
+        if condition not in self._conditions:
+            raise ValueError("Invalid condition specified")
+
+        self.condition = self._conditions[condition]
+
+    def filter(self, headers: List[Header]):
+        return [header for header in headers if any(self._has_condition(header))]
+
+    def _has_condition(self, header):
+        return [isinstance(c, self.condition) for c in header.conditions]

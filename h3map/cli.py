@@ -11,7 +11,6 @@ class List(CliView):
     def show(self, headers):
         for header in headers:
             print(header.metadata.description.name)
-            print()
 
 
 class ListDetailed(CliView):
