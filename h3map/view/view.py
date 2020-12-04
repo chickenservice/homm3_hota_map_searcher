@@ -33,21 +33,25 @@ class DescriptionView:
         self.header = header
 
     def render(self):
-        return self.header.metadata.description.summary
+        summary = self.header.metadata.description.summary
+        size = MapSizeView(self.header).render()
+        number_of_teams = self.header.teams.number_of_teams
+
+        return "Summary: {0}\n\nMap size: {1}\n\nNumber of teams: {2}\n\n".format(summary, size, number_of_teams)
 
 
 class MapSizeView:
     _sizes = {
         144: "XL",
-        72: "L",
-        36: "M",
-        18: "S",
+        108: "L",
+        72: "M",
+        36: "S",
     }
 
     def __init__(self, header):
         self.header = header
 
     def render(self):
-        size = self.header.properties.size
+        size = self.header.metadata.properties.size
         return self._sizes[size]
 

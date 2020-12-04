@@ -74,9 +74,9 @@ class TeamPlayerNumberFilter(FilterStrategy):
 class MapSizeFilter(FilterStrategy):
     _sizes = {
         "XL": 144,
-        "L": 72,
-        "M": 36,
-        "S": 18,
+        "L": 108,
+        "M": 72,
+        "S": 36,
     }
 
     def __init__(self, size):
