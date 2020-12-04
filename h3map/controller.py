@@ -3,6 +3,7 @@ import gzip
 
 from h3map.filter import HeaderFilter
 from h3map.header.map_reader import MapReader
+from h3map.view.view import MapsView
 
 
 class MainController:
@@ -18,7 +19,7 @@ class MainController:
             except Exception as e:
                 print("Sorry map couldn't be loaded for " + map_file + " due to an error: ", e)
 
-        return maps
+        return MapsView(maps.values())
 
     def filter(self, maps, size=None, teams=None, win=None, loss=None, team_players=None):
         header_filter = HeaderFilter()
@@ -36,4 +37,4 @@ class MainController:
 
             header_filter.team_has_players(int(team_players))
 
-        return header_filter.apply(maps.values())
+        return MapsView(header_filter.apply(maps))

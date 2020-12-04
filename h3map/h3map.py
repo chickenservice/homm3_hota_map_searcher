@@ -27,9 +27,9 @@ def list_maps(files, size, teams, team_players, win, loss, detailed):
     cli_ui.info(cli_ui.bold, "Querying {0} maps".format((len(files))))
 
     maps = controller.load(files)
-    filtered = controller.filter(maps, size, teams, win, loss, team_players)
+    filtered = controller.filter(maps.all(), size, teams, win, loss, team_players)
 
-    view = ListDetailed() if detailed else List()
-    view.show(filtered)
+    view = ListDetailed(filtered) if detailed else List(filtered)
+    view.show()
 
-    cli_ui.info(cli_ui.bold, cli_ui.green, "\nFound {0} matching maps".format(len(filtered)))
+    cli_ui.info(cli_ui.bold, cli_ui.green, "\nFound {0} matching maps".format(len(filtered.all())))
