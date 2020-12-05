@@ -12,8 +12,8 @@ class MainController:
         if not len(files):
             files = glob.glob("*.h3m")
         for i, map_file in enumerate(files):
-            map_contents = gzip.open(map_file, 'rb').read()
             try:
+                map_contents = gzip.open(map_file, 'rb').read()
                 header = MapReader.parse(map_contents)
                 maps[map_file] = header
             except Exception as e:
