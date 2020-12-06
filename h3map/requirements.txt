@@ -8,3 +8,4 @@ unidecode
 tabulate
 ttkthemes
 setuptools
+cli_ui
