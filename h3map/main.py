@@ -8,12 +8,12 @@ from h3map.gui import App
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-def h3map(ctx):
+def main(ctx):
     if not ctx.invoked_subcommand:
         App.run()
 
 
-@h3map.command(name="list")
+@main.command(name="list")
 @click.argument('files', nargs=-1, type=click.Path())
 @click.option('--size', default=None)
 @click.option('--teams', default=None)
@@ -33,3 +33,6 @@ def list_maps(files, size, teams, team_players, win, loss, detailed):
     view.show()
 
     cli_ui.info(cli_ui.bold, cli_ui.green, "\nFound {0} matching maps".format(len(filtered.all())))
+
+if __name__ == "__main__":
+    main(None)
