@@ -2,9 +2,9 @@ name: Package Application with Pyinstaller
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
     - name: Package Application
       uses: JackMcKew/pyinstaller-action-windows@main
       with:
-        path: h3map/h3map
+        path: h3map
 
     - uses: actions/upload-artifact@v2
       with:
