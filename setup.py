@@ -15,7 +15,7 @@ setup(
     install_requires=['click'],
     entry_points={
         'console_scripts': [
-            'h3map=h3map.main:h3map',
+            'h3map=h3map.h3map:h3map',
         ],
     },
 )
