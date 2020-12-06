@@ -1,6 +1,5 @@
 click
 pillow
-zlib
 numpy
 pip
 wheel
