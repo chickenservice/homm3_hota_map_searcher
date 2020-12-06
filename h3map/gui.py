@@ -20,32 +20,42 @@ class App(tk.Frame):
         Grid.rowconfigure(self, 0, weight=1)
         Grid.rowconfigure(self, 1, weight=15)
 
-        self.load = tk.Button(self, text="Load maps", command=self._load)
-        self.load.grid(row=0, column=0)
+        self.menubar = tk.Frame(self)
+        self.menubar.grid(row=0, columnspan=2)
 
-        self.filter = tk.Button(self, text="Filter", command=self.filter)
-        self.filter.grid(row=0, column=1)
+        self.load = tk.Button(self.menubar, text="Load maps", command=self._load)
+        self.load.pack(side="left")
+        #self.load.grid(row=0, column=0)
 
-        self.clear = tk.Button(self, text="Clear", command=self.clear)
-        self.clear.grid(row=0, column=2)
+
+        self.filter = tk.Button(self.menubar, text="Filter", command=self.filter)
+        self.filter.pack(side="left")
+        #self.filter.grid(row=0, column=1)
+
+        self.clear = tk.Button(self.menubar, text="Clear", command=self.clear)
+        self.clear.pack(side="left")
+        #self.clear.grid(row=0, column=2)
 
         # Filters
         self.selected_size = tk.StringVar()
         self.selected_size.set("XL")
-        size = tk.OptionMenu(self, self.selected_size, "XL", "L", "M", "S")
-        size.grid(row=0, column=3)
+        selected_size = tk.OptionMenu(self.menubar, self.selected_size, "XL", "L", "M", "S")
+        selected_size.pack(side="left")
+        #size.grid(row=0, column=3)
 
-        self.number_of_teams = tk.Entry(self)
-        self.number_of_teams.grid(row=0, column=4)
+        self.number_of_teams = tk.Entry(self.menubar)
+        self.number_of_teams.pack(side="left")
+        #self.number_of_teams.grid(row=0, column=4)
 
-        self.team_size = tk.Entry(self)
-        self.team_size.grid(row=0, column=5)
+        self.team_size = tk.Entry(self.menubar)
+        self.team_size.pack(side="left")
+        #self.team_size.grid(row=0, column=5)
 
-        label_win_condition = tk.Label(self, textvariable="Select win condition")
-        label_win_condition.grid(row=0, column=6)
+        label_win_condition = tk.Label(self.menubar, textvariable="Select win condition")
+        #label_win_condition.grid(row=0, column=6)
         self.selected_win_condition = tk.StringVar()
         self.selected_win_condition.set(None)
-        self.win_condition = tk.OptionMenu(self, self.selected_win_condition,
+        self.win_condition = tk.OptionMenu(self.menubar, self.selected_win_condition,
                              "Standard win",
                              "Acquire artifact",
                              "Accumulate creatures",
@@ -59,15 +69,17 @@ class App(tk.Frame):
                              "Flag mines",
                              "Transport artifact",
                              )
-        self.win_condition.grid(row=0, column=6)
+        #self.win_condition.grid(row=0, column=6)
+        self.win_condition.pack(side="left")
 
-        label_loss_condition = tk.Label(self, textvariable="Select win condition")
-        label_loss_condition.grid(row=0, column=7)
+        label_loss_condition = tk.Label(self.menubar, textvariable="Select win condition")
+        #label_loss_condition.grid(row=0, column=7)
         self.selected_loss_condition = tk.StringVar()
         self.selected_loss_condition.set(None)
-        self.loss_condition = tk.OptionMenu(self, self.selected_loss_condition, "Standard loss", "Lose town", "Lose hero",
+        self.loss_condition = tk.OptionMenu(self.menubar, self.selected_loss_condition, "Standard loss", "Lose town", "Lose hero",
                              "Time expires")
-        self.loss_condition.grid(row=0, column=7)
+        #self.loss_condition.grid(row=0, column=7)
+        self.loss_condition.pack(side="left")
 
         #
 
@@ -125,6 +137,7 @@ class App(tk.Frame):
 
         self._clear_filter()
         self.update_maps(maps)
+        self.update_map_detail(maps.descriptions(0))
         self.update_number_of_maps_found(maps.all())
 
     def clear(self):
@@ -179,3 +192,7 @@ class App(tk.Frame):
         app.title("h3map")
         frame = App(master=app)
         frame.mainloop()
+
+
+class ReadOnlyText(tk.Text):
+    pass

@@ -21,8 +21,8 @@ class Parser:
         return struct.unpack('B', self.buffer[start:stop])[0]
 
     def uint16(self):
-        start, stop = self._next(4)
-        return struct.unpack('I', self.buffer[start:stop])[0]
+        start, stop = self._next(2)
+        return struct.unpack('H', self.buffer[start:stop])[0]
 
     def uint32(self):
         start, stop = self._next(4)
