@@ -1,3 +1,5 @@
+import sys
+
 import cli_ui
 import click
 
@@ -34,5 +36,6 @@ def list_maps(files, size, teams, team_players, win, loss, detailed):
 
     cli_ui.info(cli_ui.bold, cli_ui.green, "\nFound {0} matching maps".format(len(filtered.all())))
 
-if __name__ == "__main__":
-    main(None)
+
+if getattr(sys, "frozen", False):
+    main(sys.argv[1:])
