@@ -5,7 +5,7 @@ import click
 
 from h3map.cli import ListDetailed, List
 from h3map.controller import MainController
-from h3map.gui import App
+from h3map.gui.gui import App
 
 
 @click.group(invoke_without_command=True)
