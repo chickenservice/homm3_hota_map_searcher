@@ -15,7 +15,7 @@ class NumberOfMapsLoadedLabel(tk.Label):
         self.grid(row=2, column=0)
 
     def update(self, maps):
-        self.number_of_maps_loaded.set("Maps found: {0}".format(len(maps)))
+        self.number_of_maps_loaded.set("Maps found: {0}".format(len(maps.all())))
 
 
 class MapDetailText(tk.Text):
@@ -26,8 +26,17 @@ class MapDetailText(tk.Text):
     def update(self, description):
         self.config(state=tk.NORMAL)
         self.delete("1.0", tk.END)
-        self.insert(tk.END, description)
+        self.insert(tk.END, )
         self.config(state=tk.DISABLED)
+
+    def update_single(self, event):
+        w = event.widget
+        selection = w.curselection()
+        if len(selection):
+            idx = int(selection[0])
+
+            description = self.maps.descriptions(idx)
+            self.map_detail.update(description.render())
 
 
 class MapListbox(tk.Listbox):
@@ -35,9 +44,10 @@ class MapListbox(tk.Listbox):
         super().__init__(master)
         self.bind('<<ListboxSelect>>', onclick)
 
-    def update(self, name):
-        if name:
-            self.insert(1, name)
+    def update(self, maps):
+        if maps:
+            for name in maps.names():
+                self.insert(1, name)
         else:
             self.delete(1, tk.END)
 
@@ -48,9 +58,11 @@ class App(tk.Frame):
         self.master = master
         self.pack(fill="both", expand=True)
         self.maps = MapsView([])
-        self.create_widgets()
 
-    def create_widgets(self):
+        self.load_listeners = []
+        self.filter_listeners = []
+        self.clear_listeners = []
+
         Grid.columnconfigure(self, 0, weight=2)
         Grid.columnconfigure(self, 1, weight=2)
         Grid.rowconfigure(self, 0, weight=1)
@@ -62,11 +74,21 @@ class App(tk.Frame):
         panes.grid(row=1, columnspan=8, sticky=tk.N + tk.S + tk.E + tk.W)
 
         self.number_of_maps_found = NumberOfMapsLoadedLabel(self)
-        self.maps_list = MapListbox(panes, onclick=self.onclick)
+        self.maps_list = MapListbox(panes, onclick=self._onclick)
         self.map_detail = MapDetailText(panes)
 
         panes.add(self.maps_list, stretch="always")
         panes.add(self.map_detail, stretch="always")
+
+        self.load_listeners.append(self.number_of_maps_found)
+        self.load_listeners.append(self.maps_list)
+        self.load_listeners.append(self.map_detail)
+
+        self.filter_listeners.append(self.number_of_maps_found)
+        self.filter_listeners.append(self.maps_list)
+        self.filter_listeners.append(self.map_detail)
+
+        self.clear_listeners.append(self.maps_list)
 
     def load(self):
         files = askopenfilenames()
@@ -76,27 +98,7 @@ class App(tk.Frame):
 
         self._clear_filter()
         self.maps.update(maps)
-        self.update_maps(maps)
-
-        first_description = self.maps.descriptions(0)
-        self.update_map_detail(first_description.render())
-        self.update_number_of_maps_found(self.maps.all())
-
-    def update_maps(self, maps):
-        for name in maps.names():
-            self.maps_list.update(name.render())
-
-    def update_map_detail(self, description):
-        self.map_detail.update(description)
-
-    def update_number_of_maps_found(self, maps):
-        self.number_of_maps_found.update(maps)
-
-    def _clear_filter(self):
-        self.maps_list.update(None)
-
-    def clear(self):
-        self.update_maps(self.maps)
+        self.loaded(maps)
 
     def filter(self):
         controller = MainController()
@@ -110,18 +112,35 @@ class App(tk.Frame):
         )
 
         self._clear_filter()
-        self.update_maps(maps)
-        self.update_map_detail(maps.descriptions(0))
-        self.update_number_of_maps_found(maps.all())
+        self.filtered(maps)
 
-    def onclick(self, event):
-        w = event.widget
-        selection = w.curselection()
-        if len(selection):
-            idx = int(selection[0])
+    def clear(self):
+        self.cleared(self.maps)
 
-            description = self.maps.descriptions(idx)
-            self.update_map_detail(description.render())
+    def filtered(self, filtered):
+        for listener in self.filter_listeners:
+            listener.update(filtered)
+
+    def loaded(self, loaded):
+        for listener in self.load_listeners:
+            listener.update(loaded)
+
+    def cleared(self, cleared):
+        for listener in self.cleared_listeners:
+            listener.update(cleared)
+
+    def _update_maps_list(self, maps):
+        for name in maps.names():
+            self.maps_list.update(name.render())
+
+    def _update_map_detail(self, description):
+        self.map_detail.update(description)
+
+    def _update_number_of_maps_found(self, maps):
+        self.number_of_maps_found.update(maps)
+
+    def _clear_filter(self):
+        self.maps_list.update(None)
 
     @classmethod
     def run(cls):
