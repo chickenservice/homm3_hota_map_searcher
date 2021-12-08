@@ -52,7 +52,7 @@ class MapReader(ABC):
     def read_description(self):
         name = self.parser.string()
         desc = self.parser.string()
-        return Description(name, desc)
+        return Description(name.decode("latin-1"), desc.decode("latin-1"))
 
     def read_difficulty(self):
         diff = self.parser.uint8()
@@ -68,6 +68,7 @@ class MapReader(ABC):
                 continue
 
             player = PlayerInfo(
+                who_can_play,
                 self.read_ai_type(),
                 self.read_faction_info(),
                 self.read_town_info(),

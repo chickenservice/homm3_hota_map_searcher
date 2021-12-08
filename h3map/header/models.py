@@ -86,6 +86,7 @@ class Metadata(ABC):
     properties: MapProperties
     description: Description
     difficulty: Difficulty
+    thumbnail: str = "default.gif"
 
     def __repr__(self):
         return "Name: {0}\nVersion: {1}\n\nDescription: {2}\n" \
@@ -100,15 +101,6 @@ class Hero(ABC):
 
 
 @dataclass
-class PlayerInfo(ABC):
-    ai_type: AiType
-    faction_info: FactionInfo
-    town_info: TownInfo
-    hero_properties: HeroInfo
-    heroes: List[Hero]
-
-
-@dataclass
 class WhoCanPlay(ABC):
     can_human_play: bool
     can_computer_play: bool
@@ -116,6 +108,16 @@ class WhoCanPlay(ABC):
     @property
     def nobody(self):
         return not (self.can_human_play or self.can_computer_play)
+
+
+@dataclass
+class PlayerInfo(ABC):
+    who_can_play: WhoCanPlay
+    ai_type: AiType
+    faction_info: FactionInfo
+    town_info: TownInfo
+    hero_properties: HeroInfo
+    heroes: List[Hero]
 
 
 @dataclass
@@ -284,6 +286,10 @@ class Header(ABC):
     teams: TeamSetup
     allowed_heroes: List[str]
     conditions: List[Condition]
+
+    def humans(self):
+        return len([player for player in self.players_info if player.who_can_play.can_human_play])
+
 
     def __repr__(self):
         string = "{0}\n".format(self.metadata)

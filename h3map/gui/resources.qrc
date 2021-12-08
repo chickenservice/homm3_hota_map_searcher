@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>icons/hota.gif</file>
+        <file>icons/impossible.gif</file>
+        <file>icons/mapsize.gif</file>
+        <file>icons/players.gif</file>
+        <file>icons/star.png</file>
+        <file>icons/underworld.gif</file>
+    </qresource>
+    <qresource prefix="/img">
+        <file>img/default.gif</file>
+    </qresource>
+</RCC>

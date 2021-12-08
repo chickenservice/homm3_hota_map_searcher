@@ -17,6 +17,7 @@ class AbReader(MapReader):
                 continue
 
             player = PlayerInfo(
+                who_can_play,
                 self.read_ai_type(),
                 self.read_faction_info(),
                 self.read_town_info(),

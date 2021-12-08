@@ -5,14 +5,15 @@ import click
 
 from h3map.cli import ListDetailed, List
 from h3map.controller import MainController
-from h3map.gui.gui import App
+from h3map.gui.main import QtApp
 
 
 @click.group(invoke_without_command=True)
 @click.pass_context
 def main(ctx):
     if not ctx.invoked_subcommand:
-        App.run()
+        #App.run()
+        QtApp.run()
 
 
 @main.command(name="list")

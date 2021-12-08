@@ -1,6 +1,7 @@
 import glob
 import gzip
 import os
+from pathlib import Path
 
 from h3map.filter import HeaderFilter
 from h3map.header.map_reader import MapReader
@@ -13,7 +14,19 @@ class MainController:
         with open(path, "wb") as file:
             file.write(unzipped)
 
-    def load(self, files):
+    @staticmethod
+    def scan_directory(directory):
+        exp = str(Path(directory) / "*.h3m")
+        return glob.glob(exp[8:])
+
+    def load_map(self, file):
+        try:
+            map_contents = gzip.open(file, 'rb').read()
+            return MapReader.parse(map_contents)
+        except Exception as e:
+            print("Sorry map couldn't be loaded for " + file + " due to an error: ", e)
+
+    def load(self, files, observer=None):
         maps = {}
         if not len(files):
             files = glob.glob("*.h3m")
@@ -27,13 +40,17 @@ class MainController:
                     map_contents = gzip.open(map_file, 'rb').read()
                 header = MapReader.parse(map_contents)
                 maps[map_file] = header
+                """
                 if not os.path.isdir(".cache"):
                     os.mkdir(".cache")
                 if not os.path.isfile(".cache/" + os.path.basename(map_file)):
                     self.cache(".cache/" + os.path.basename(map_file), map_contents)
+                """
             except Exception as e:
                 print("Sorry map couldn't be loaded for " + map_file + " due to an error: ", e)
 
+            if observer:
+                observer.ntf(header)
         return MapsView(maps.values())
 
     def filter(self, maps, size=None, teams=None, win=None, loss=None, team_players=None):

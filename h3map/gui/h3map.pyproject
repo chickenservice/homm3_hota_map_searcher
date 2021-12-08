@@ -1,0 +1,3 @@
+{
+    "files": ["Views/Components/MapCard/Footer.qml","Views/Components/MapListView.qml","Views/Components/MapCard/Content.qml","Views/ChooseLibraryPage.qml","Views/Components/MapPreview.qml","resources.qrc","Views/Components/MapCard/Header.qml","Views/Components/Card.qml","Views/LibraryPage.qml","main.py","ViewModels/LibraryModel.qml","Views/DiscoverPage.qml","main.qml","ViewModels/DiscoverModel.qml","Views/Components/MapCard/MapCard.qml"]
+}

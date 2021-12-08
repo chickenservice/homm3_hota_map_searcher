@@ -32,7 +32,7 @@ class RoeReader(MapReader):
             town = self.read_town_info(),
             heroes = self.read_heroes_belonging_to_player(town, hero)
 
-            player = PlayerInfo(ai, faction, hero, town, heroes)
+            player = PlayerInfo(who_can_play, ai, faction, hero, town, heroes)
             players.append(player)
 
         return players
