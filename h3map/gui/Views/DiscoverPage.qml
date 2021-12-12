@@ -12,9 +12,11 @@ Item {
         dispatcher: model
     }
 
-    MapListView{
+    MapListView {
         id: discover
         model: onlineModel.maps
+
+        anchors.fill: parent
 
         onContentYChanged: {
             if(isAtEnd()) {

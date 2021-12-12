@@ -10,9 +10,6 @@ import "MapCard"
 GridView {
     id: mapListView
 
-    anchors.fill: parent
-    anchors.margins: 20
-
     clip: true
 
     cellWidth: 600
@@ -41,6 +38,16 @@ GridView {
 
     delegate: MapCard {
 
+    }
+
+    add: Transition {
+        NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 400 }
+        NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 400 }
+    }
+
+    remove: Transition {
+        NumberAnimation { property: "opacity"; from: 1.0; to: 0; duration: 400 }
+        NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: 400 }
     }
 }
 

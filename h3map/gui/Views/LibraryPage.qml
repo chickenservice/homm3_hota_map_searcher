@@ -1,4 +1,6 @@
 import QtQuick 2.0
+import QtQuick.Controls 2.0
+import QtQuick.Layouts 1.0
 
 import "../ViewModels"
 import "Components"
@@ -38,11 +40,32 @@ Item {
         }
     ]
 
-    MapListView {
+    ColumnLayout {
         id: library
         visible: false
-        model: libraryModel.maps
+        anchors.fill: parent
+
+        ToolBar {
+            id: toolBar
+            Layout.fillWidth: true
+            padding: 20
+
+            background: Rectangle {
+                color: '#eeeeee'
+            }
+
+            FilterBar {
+                app: model
+            }
+        }
+
+        MapListView {
+            model: libraryModel.maps
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+        }
     }
+
 
     ChooseLibraryPage {
         id: chooseLibrary

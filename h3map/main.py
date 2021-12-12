@@ -4,7 +4,7 @@ import cli_ui
 import click
 
 from h3map.cli import ListDetailed, List
-from h3map.controller import MainController
+from h3map.library.library import Library
 from h3map.gui.main import QtApp
 
 
@@ -25,7 +25,7 @@ def main(ctx):
 @click.option('--loss', default=None)
 @click.option('--detailed', is_flag=True)
 def list_maps(files, size, teams, team_players, win, loss, detailed):
-    controller = MainController()
+    controller = Library()
 
     cli_ui.info(cli_ui.bold, "Querying {0} maps".format((len(files))))
 

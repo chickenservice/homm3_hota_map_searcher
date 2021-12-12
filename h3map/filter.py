@@ -13,6 +13,23 @@ class FilterStrategy(abc.ABC):
         raise NotImplemented("Please implement a concrete filter.")
 
 
+class Filter:
+    def __init__(self):
+        self._filters = []
+
+    def add_rule(self, strategy: FilterStrategy):
+        self._filters.append(strategy)
+
+    def clear(self):
+        self._filters.clear()
+
+    def apply(self, maps):
+        result = maps
+        for f in self._filters:
+            result = f.filter(maps)
+
+        return result
+
 class HeaderFilter:
     def __init__(self):
         self.filters = []
@@ -87,6 +104,10 @@ class MapSizeFilter(FilterStrategy):
 
     def filter(self, headers: List[Header]):
         return [header for header in headers if self._has_size(header)]
+
+    @classmethod
+    def sizes(cls):
+        return list(cls._sizes.keys())
 
     def _has_size(self, header):
         return header.metadata.properties.size == self.size

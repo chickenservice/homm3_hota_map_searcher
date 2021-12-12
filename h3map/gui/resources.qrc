@@ -10,4 +10,10 @@
     <qresource prefix="/img">
         <file>img/default.gif</file>
     </qresource>
+    <qresource prefix="/">
+        <file>Views/Components/FilterComboCheckBox.qml</file>
+        <file>ViewModels/FilterModel.qml</file>
+        <file>ViewModels/FilterOption.qml</file>
+        <file>Views/FilterBar.qml</file>
+    </qresource>
 </RCC>

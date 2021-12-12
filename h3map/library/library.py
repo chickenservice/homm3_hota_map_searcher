@@ -3,26 +3,54 @@ import gzip
 import os
 from pathlib import Path
 
-from h3map.filter import HeaderFilter
+from h3map.filter import HeaderFilter, Filter
 from h3map.header.map_reader import MapReader
 from h3map.view.view import MapsView
 
 
-class MainController:
-    @classmethod
-    def cache(cls, path, unzipped):
-        with open(path, "wb") as file:
-            file.write(unzipped)
+class Maps:
+    def __init__(self):
+        self.maps = []
 
-    @staticmethod
-    def scan_directory(directory):
-        exp = str(Path(directory) / "*.h3m")
+    def add(self, header):
+        self.maps.append(header)
+
+    def get_all(self):
+        return self.maps
+
+    def filter(self, filter_spec):
+        return filter_spec.apply(self.maps)
+
+
+class Config:
+    def __init__(self, library_dir=""):
+        self.library_dir = library_dir
+
+    def set_library_dir(self, directory):
+        self.library_dir = directory
+
+    def detected_map_files(self):
+        exp = str(Path(self.library_dir) / "*.h3m")
         return glob.glob(exp[8:])
+
+
+class Library:
+    def __init__(self):
+        self.maps = Maps()
+
+    def import_map(self, file):
+        header = self.load_map(file)
+        self.maps.add(header)
+
+    def all_maps(self):
+        return self.maps.get_all()
 
     def load_map(self, file):
         try:
             map_contents = gzip.open(file, 'rb').read()
-            return MapReader.parse(map_contents)
+            header = MapReader.parse(map_contents)
+            self.maps.add(header)
+            return header
         except Exception as e:
             print("Sorry map couldn't be loaded for " + file + " due to an error: ", e)
 
@@ -52,6 +80,10 @@ class MainController:
             if observer:
                 observer.ntf(header)
         return MapsView(maps.values())
+
+    def filter_maps(self, filter_spec: Filter):
+        return filter_spec.apply(self.maps.get_all())
+
 
     def filter(self, maps, size=None, teams=None, win=None, loss=None, team_players=None):
         header_filter = HeaderFilter()

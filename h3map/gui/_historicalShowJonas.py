@@ -5,7 +5,7 @@ import PySide2
 from PySide2.QtCore import QObject, Signal, QAbstractListModel, QModelIndex, QThread, Slot
 from qasync import QtCore
 
-from h3map.controller import MainController
+from h3map.library.library import Library
 from h3map.gui.main import MapSummary
 from h3map.header.models import Header
 
@@ -21,7 +21,7 @@ class Worker(QObject):
         self.dir = dir
 
     def run(self):
-        controller = MainController()
+        controller = Library()
         exp = str(Path(self.dir) / "*.h3m")
         files = glob.glob(exp[8:])
         self.starting.emit(len(files))
@@ -76,7 +76,7 @@ class Maps(QAbstractListModel):
         self.thread.start()
 
     async def _loaded(self, dir):
-        controller = MainController()
+        controller = Library()
         exp = str(Path(dir) / "*.h3m")
         files = glob.glob(exp[8:])
         maps = controller.load(files, observer=self).all()

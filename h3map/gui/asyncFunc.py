@@ -1,7 +1,7 @@
 import sys
 import traceback
 
-from PySide2.QtCore import QObject, Signal, QRunnable
+from PySide2.QtCore import QObject, Signal, QRunnable, Slot
 
 
 class AsyncSignals(QObject):

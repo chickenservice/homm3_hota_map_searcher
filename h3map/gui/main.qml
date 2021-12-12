@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.15
 
 import "ViewModels"
 import "Views"
+import "Views/Components"
 
 Rectangle {
     required property var app
@@ -14,15 +15,20 @@ Rectangle {
     color: '#eeeeee'
 
     GridLayout{
+        id:content
+
         anchors.fill: parent
 
         columns: 1
         rows: 3
 
-        rowSpacing: 10
+        rowSpacing: 0
+        columnSpacing: 0
 
         TabBar {
             id: menu
+
+            Layout.fillWidth: true
 
             TabButton{
                 text: qsTr("Library")
@@ -35,24 +41,30 @@ Rectangle {
             }
         }
 
-        StackLayout{
-            currentIndex: menu.currentIndex
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
-            Layout.alignment: Qt.AlignTop
+            StackLayout{
+                currentIndex: menu.currentIndex
+                Layout.fillWidth: true
+                Layout.fillHeight: true
 
-            LibraryPage {
-                id: libraryTab
-                model: app
-            }
+                LibraryPage {
+                    id: libraryTab
+                    model: app
+                }
 
-            DiscoverPage {
-                id: discoverTab
-                model: app
+                DiscoverPage {
+                    id: discoverTab
+                    model: app
+                }
             }
         }
 
         ToolBar {
             Layout.fillWidth: true
+            Layout.alignment: Qt.AlignTop
 
             ProgressBar {
                 id: progress
