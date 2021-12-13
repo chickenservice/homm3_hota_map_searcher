@@ -1,4 +1,5 @@
 import sys
+import time
 from pathlib import Path
 
 from PySide2.QtCore import Signal, QObject, Slot, Property, QUrl, QSize, QThreadPool
@@ -14,13 +15,18 @@ from h3map.library.library import Library, Config
 
 
 class MapSummary(QObject):
-    def __init__(self, header: Header):
+    def __init__(self, header: Header, filter_index=None):
         super().__init__()
         self._name = header.metadata.description.name
         self._description = header.metadata.description.summary
         self._teams = header.teams.number_of_teams
         # self._humans = header.humans()
         self._thumbnail = header.metadata.thumbnail
+        self._idx = filter_index
+
+    @Property(int)
+    def idx(self):
+        return self._idx
 
     @Property(str)
     def name(self):
@@ -121,8 +127,9 @@ class App(QObject):
         builder.addFilter(TeamPlayerNumberFilter, playerNumber["7"])
         builder.addFilter(TeamPlayerNumberFilter, playerNumber["8"])
 
+        start = time.time()
         filtered = self.library.filter_maps(builder.build())
-        self.filtered.emit([MapSummary(header) for header in filtered])
+        self.filtered.emit([MapSummary(header[1], filter_index=header[0]) for header in filtered])
 
     @Slot()
     def filterMaps(self):
@@ -131,8 +138,8 @@ class App(QObject):
 
     @Slot()
     def clearFilter(self):
-        self.filter.clear()
-        self.filtered.emit([MapSummary(header) for header in self.library.all_maps()])
+        #self.filter.clear()
+        self.filtered.emit([MapSummary(header, idx) for idx, header in enumerate(self.library.all_maps())])
 
     @Slot(int)
     def discover(self, requestedAmountOfItems):

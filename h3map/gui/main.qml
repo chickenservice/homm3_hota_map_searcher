@@ -52,7 +52,7 @@ Rectangle {
 
                 LibraryPage {
                     id: libraryTab
-                    model: app
+                    application: app
                 }
 
                 DiscoverPage {

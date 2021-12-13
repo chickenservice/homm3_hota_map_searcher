@@ -35,19 +35,10 @@ GridView {
         var totalHeight = ((height / cellHeight) * (count / (width / cellWidth)))
         return (contentY + height) >= totalHeight
     }
-
-    delegate: MapCard {
-
-    }
-
     add: Transition {
-        NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 400 }
-        NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 400 }
-    }
-
-    remove: Transition {
-        NumberAnimation { property: "opacity"; from: 1.0; to: 0; duration: 400 }
-        NumberAnimation { property: "scale"; from: 1.0; to: 0; duration: 400 }
+        id: populateTrans
+        NumberAnimation { properties: "scale"; from: 0; to: 1.0; duration: 400 }
+        NumberAnimation { properties: "opacity"; from: 0; to: 1.0; duration: 400 }
     }
 }
 

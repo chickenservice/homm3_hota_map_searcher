@@ -37,7 +37,7 @@ RowLayout {
             model: 5
 
             ToolButton{
-                icon.source: "qrc:///icons/star.png"
+                icon.source: "../../../icons/star.png"
                 background: Rectangle {
                     color: "white"
                 }

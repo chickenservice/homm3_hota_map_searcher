@@ -1,25 +1,32 @@
 import glob
 import gzip
 import os
+import time
 from pathlib import Path
 
 from h3map.filter import HeaderFilter, Filter
 from h3map.header.map_reader import MapReader
+from h3map.header.models import Header
 from h3map.view.view import MapsView
 
 
 class Maps:
     def __init__(self):
         self.maps = []
+        self._idx = {}
 
-    def add(self, header):
+    def add(self, header: Header):
         self.maps.append(header)
+        self._idx[header.metadata.description.name] = len(self.maps) - 1
 
     def get_all(self):
         return self.maps
 
     def filter(self, filter_spec):
         return filter_spec.apply(self.maps)
+
+    def index(self, header):
+        return self._idx[header.metadata.description.name]
 
 
 class Config:
@@ -82,7 +89,9 @@ class Library:
         return MapsView(maps.values())
 
     def filter_maps(self, filter_spec: Filter):
-        return filter_spec.apply(self.maps.get_all())
+        headers = filter_spec.apply(self.maps.get_all())
+        res = [(self.maps.index(header), header) for header in headers]
+        return res
 
 
     def filter(self, maps, size=None, teams=None, win=None, loss=None, team_players=None):

@@ -19,7 +19,8 @@ Item {
     Connections {
         id: mapsActions
 
-        function onFiltered(headers) {
+        /*
+        function onFilteredOff(headers) {
             maps.clear()
             for(var i in headers) {
                 var header = headers[i]
@@ -27,9 +28,10 @@ Item {
                 maps.append(item)
             }
         }
+        */
 
         function onAddMap(header) {
-            var item = {"name": header.name, "description": header.description, "players": header.humans, "teams": header.teams, "thumbnail": header.thumbnail}
+            var item = {"idx": maps.count, "name": header.name, "description": header.description, "players": header.humans, "teams": header.teams, "thumbnail": header.thumbnail}
             maps.append(item)
         }
     }
