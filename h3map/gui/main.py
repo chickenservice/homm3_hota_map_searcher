@@ -8,7 +8,7 @@ from PySide2.QtWidgets import QApplication
 
 from h3map.discover.maps4heroes import DiscoverMaps4Heroes
 from h3map.discover.remote_map_loader import FileHtmlMapInfoLoader
-from h3map.filter import Filter, MapSizeFilter, TeamSizeFilter, TeamPlayerNumberFilter
+from h3map.filter import Filter, MapSizeFilter, TeamSizeFilter, TeamPlayerNumberFilter, AndFilter
 from h3map.gui.asyncFunc import Loop, AsyncFunc
 from h3map.header.models import Header
 from h3map.library.library import Library, Config
@@ -55,7 +55,8 @@ class App(QObject):
     progress = Signal(MapSummary)
     addMap = Signal(MapSummary)
     retrievedMaps = Signal(list)
-    filtered = Signal(list)
+    #filtered = Signal(list)
+    filtered = Signal("QVariantMap")
     filterAdded = Signal(int)
     filterCleared = Signal()
 
@@ -93,43 +94,76 @@ class App(QObject):
 
     @Slot("QVariantMap")
     def applyFilter(self, filterForm):
-        #if "mapSizeOptions" in filterForm:
-        #   options = filterForm["mapSizeOptions"]
-        #   for option in options:
-        #       builder.addFilter(MapSizeFilter, option[options])
-        builder = FilterFormBuilder()
+        merged = AndFilter()
+        mapSizeFilter = FilterFormSelectionBuilder()
+        teamSizeFilter = FilterFormSelectionBuilder()
+        playerFilter = FilterFormSelectionBuilder()
 
         mapSize = filterForm["mapSizeOptions"]
-        builder.addFilter(MapSizeFilter, mapSize["XL"])
-        builder.addFilter(MapSizeFilter, mapSize["L"])
-        builder.addFilter(MapSizeFilter, mapSize["M"])
-        builder.addFilter(MapSizeFilter, mapSize["S"])
+        mapSizeFilter.addFilter(MapSizeFilter, mapSize["XL"])
+        mapSizeFilter.addFilter(MapSizeFilter, mapSize["L"])
+        mapSizeFilter.addFilter(MapSizeFilter, mapSize["M"])
+        mapSizeFilter.addFilter(MapSizeFilter, mapSize["S"])
 
         teamSize = filterForm["teamSizeOptions"]
-        builder.addFilter(TeamSizeFilter, teamSize["0"])
-        builder.addFilter(TeamSizeFilter, teamSize["1"])
-        builder.addFilter(TeamSizeFilter, teamSize["2"])
-        builder.addFilter(TeamSizeFilter, teamSize["3"])
-        builder.addFilter(TeamSizeFilter, teamSize["4"])
-        builder.addFilter(TeamSizeFilter, teamSize["5"])
-        builder.addFilter(TeamSizeFilter, teamSize["6"])
-        builder.addFilter(TeamSizeFilter, teamSize["7"])
-        builder.addFilter(TeamSizeFilter, teamSize["8"])
+        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["0"])
+        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["1"])
+        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["2"])
+        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["3"])
+        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["4"])
+        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["5"])
+        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["6"])
+        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["7"])
+        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["8"])
 
         playerNumber = filterForm["playerNumberOptions"]
-        builder.addFilter(TeamPlayerNumberFilter, playerNumber["0"])
-        builder.addFilter(TeamPlayerNumberFilter, playerNumber["1"])
-        builder.addFilter(TeamPlayerNumberFilter, playerNumber["2"])
-        builder.addFilter(TeamPlayerNumberFilter, playerNumber["3"])
-        builder.addFilter(TeamPlayerNumberFilter, playerNumber["4"])
-        builder.addFilter(TeamPlayerNumberFilter, playerNumber["5"])
-        builder.addFilter(TeamPlayerNumberFilter, playerNumber["6"])
-        builder.addFilter(TeamPlayerNumberFilter, playerNumber["7"])
-        builder.addFilter(TeamPlayerNumberFilter, playerNumber["8"])
+        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["0"])
+        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["1"])
+        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["2"])
+        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["3"])
+        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["4"])
+        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["5"])
+        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["6"])
+        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["7"])
+        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["8"])
 
-        start = time.time()
-        filtered = self.library.filter_maps(builder.build())
-        self.filtered.emit([MapSummary(header[1], filter_index=header[0]) for header in filtered])
+        merged.add(playerFilter.build())
+        merged.add(teamSizeFilter.build())
+        merged.add(mapSizeFilter.build())
+
+        filtered = self.library.filter_maps(merged)
+        summary = {"mapSize": {}, "playerNumber": {}, "teamSize": {}}
+
+        for option in mapSize:
+            f = FilterFormAllBuilder()
+            f.addFilter(MapSizeFilter, mapSize[option])
+            total = AndFilter()
+            total.add(f.build())
+            total.add(playerFilter.build())
+            total.add(teamSizeFilter.build())
+            summary["mapSize"][option] = len(self.library.filter_maps(total))
+
+        for option in teamSize:
+            f = FilterFormAllBuilder()
+            f.addFilter(TeamSizeFilter, teamSize[option])
+            total = AndFilter()
+            total.add(f.build())
+            total.add(playerFilter.build())
+            total.add(mapSizeFilter.build())
+            summary["teamSize"][option] = len(self.library.filter_maps(total))
+
+        for option in playerNumber:
+            f = FilterFormAllBuilder()
+            f.addFilter(TeamPlayerNumberFilter, playerNumber[option])
+            total = AndFilter()
+            total.add(f.build())
+            total.add(teamSizeFilter.build())
+            total.add(mapSizeFilter.build())
+            summary["playerNumber"][option] = len(self.library.filter_maps(total))
+
+        summary["filtered"] = [idx for idx, _ in filtered]
+        #self.filtered.emit([MapSummary(header[1], filter_index=header[0]) for header in filtered])
+        self.filtered.emit(summary)
 
     @Slot()
     def filterMaps(self):
@@ -154,16 +188,33 @@ class App(QObject):
         self.addMap.emit(MapSummary(header))
 
 
-class FilterFormBuilder:
+class FilterFormSelectionBuilder:
     def __init__(self):
-        self._filter = Filter()
+        self._filters = []
 
     def addFilter(self, strategy, option):
         if option["selected"]:
-            self._filter.add_rule(strategy(option["value"]))
+            self._filters.append(strategy(option["value"]))
 
     def build(self):
-        return self._filter
+        f = Filter()
+        for i in self._filters:
+            f.add_rule(i)
+        return f
+
+
+class FilterFormAllBuilder:
+    def __init__(self, filters=None):
+        self._filters = filters._filters if filters else []
+
+    def addFilter(self, strategy, option):
+        self._filters.append(strategy(option["value"]))
+
+    def build(self):
+        f = Filter()
+        for i in self._filters:
+            f.add_rule(i)
+        return f
 
 
 class QtApp:

@@ -90,11 +90,11 @@ Item {
 
             ]
 
-            function updateFilter(filtered) {
+            function updateFilter(summary) {
+                var filtered = summary["filtered"]
                 viewList.items.removeGroups(0, viewList.items.count, "filtered")
                 for(var i = 0; i < filtered.length; i++) {
-                    var toUpdate = filtered[i].idx
-                    viewList.items.addGroups(toUpdate, 1, "filtered")
+                    viewList.items.addGroups(filtered[i], 1, "filtered")
                 }
             }
 

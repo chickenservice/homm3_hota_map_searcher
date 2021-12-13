@@ -23,12 +23,44 @@ class Filter:
     def clear(self):
         self._filters.clear()
 
+    def filter(self, maps):
+        result = []
+        for f in self._filters:
+            result += f.filter(maps)
+
+        if not len(self._filters): return maps
+
+        return result
+
+    def apply(self, maps):
+        result = []
+        for f in self._filters:
+            result += f.filter(maps)
+
+        return result
+
+
+class AndFilter(FilterStrategy):
+    def __init__(self):
+        self._filters = []
+
+    def add(self, strategy: FilterStrategy):
+        self._filters.append(strategy)
+
+    def filter(self, maps):
+        result = maps
+        for f in self._filters:
+            result = f.filter(result)
+
+        return result
+
     def apply(self, maps):
         result = maps
         for f in self._filters:
-            result = f.filter(maps)
+            result = f.filter(result)
 
         return result
+
 
 class HeaderFilter:
     def __init__(self):

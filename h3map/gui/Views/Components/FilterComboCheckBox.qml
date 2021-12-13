@@ -106,6 +106,12 @@ ComboBox {
                 verticalAlignment: Qt.AlignVCenter
                 horizontalAlignment: Qt.AlignHCenter
             }
+
+            Label {
+                text: count
+                padding: { left: 5; right: 5 }
+                horizontalAlignment: Qt.AlignRight
+            }
         }
     }
 }

@@ -14,6 +14,18 @@ Rectangle {
 
     color: '#eeeeee'
 
+    Item {
+        id: logger
+
+        Connections {
+            target: app
+
+            function onFiltered(summary) {
+                console.log('Filtered items: ', summary["filtered"].length)
+            }
+        }
+    }
+
     GridLayout{
         id:content
 
