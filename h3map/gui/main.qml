@@ -6,9 +6,14 @@ import QtQuick.Layouts 1.15
 import "ViewModels"
 import "Views"
 import "Views/Components"
+import "Views/Components/MapCard"
 
 Rectangle {
     required property var app
+
+    required property var importToLibrary
+
+    required property var filterLibrary
 
     anchors.fill: parent
 
@@ -18,9 +23,9 @@ Rectangle {
         id: logger
 
         Connections {
-            target: app
+            target: filterLibrary
 
-            function onFiltered(summary) {
+            function onApplied(summary) {
                 console.log('Filtered items: ', summary["filtered"].length)
             }
         }
@@ -64,7 +69,11 @@ Rectangle {
 
                 LibraryPage {
                     id: libraryTab
-                    application: app
+                    libraryModel: LibraryModel {
+                        libraryActions: importToLibrary
+                        filterActions: filterLibrary
+                        delegate: MapCard {}
+                    }
                 }
 
                 DiscoverPage {
@@ -82,13 +91,13 @@ Rectangle {
                 id: progress
 
                 Connections {
-                    target: app
+                    target: importToLibrary
 
-                    function onStarting(maxCount) {
+                    function onImportMaps(maxCount) {
                         progress.to = maxCount
                     }
 
-                    function onAddMap(header) {
+                    function onImportedMap(header) {
                         progress.value += 1
                     }
                 }

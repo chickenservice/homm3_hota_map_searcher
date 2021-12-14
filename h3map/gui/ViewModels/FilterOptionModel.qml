@@ -1,9 +1,7 @@
 import QtQuick 2.0
 
 Item {
-    required property var filterOptions
-
-    signal filterSelected
+    required property ListModel filterOptions
 
     function toggleFilter(index) {
         var status = filterOptions.get(index).selected

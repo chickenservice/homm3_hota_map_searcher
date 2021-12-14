@@ -8,12 +8,8 @@ import "Components"
 import "Components/MapCard"
 
 Item {
-    required property var application
 
-    LibraryModel {
-        id: libraryModel
-        dispatcher: application
-    }
+    required property LibraryModel libraryModel
 
     states: [
         State {
@@ -57,48 +53,14 @@ Item {
             }
 
             FilterBar {
-                app: application
+                filterModel: libraryModel.filters
             }
         }
 
         MapListView {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            model: viewList
-
-            Connections {
-                target: application
-
-                function onFiltered(filtered) {
-                    viewList.updateFilter(filtered)
-                }
-
-            }
-        }
-
-        DelegateModel {
-            id: viewList
             model: libraryModel.maps
-            delegate: MapCard {
-            }
-
-            groups: [
-                DelegateModelGroup {
-                    includeByDefault: true
-                    name: "filtered"
-                }
-
-            ]
-
-            function updateFilter(summary) {
-                var filtered = summary["filtered"]
-                viewList.items.removeGroups(0, viewList.items.count, "filtered")
-                for(var i = 0; i < filtered.length; i++) {
-                    viewList.items.addGroups(filtered[i], 1, "filtered")
-                }
-            }
-
-            filterOnGroup: "filtered"
         }
     }
 
@@ -106,6 +68,6 @@ Item {
     ChooseLibraryPage {
         id: chooseLibrary
         visible: true
-        onLibraryPathChosen: libraryModel.onImportFiles(path)
+        onLibraryPathChosen: libraryModel.importFromFolder(path)
     }
 }
