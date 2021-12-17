@@ -94,6 +94,9 @@ class ShowMyMapsView(QObject):
         self._maps_configured = True
         self.configuredChanged.emit()
 
+    def show_filtered_maps(self, summary: dict):
+        self.applied.emit(summary)
+
     def show_map_overview(self, header):
         self.importedMap.emit(_toDict(header))
 
@@ -113,7 +116,6 @@ class ShowMyMapsView(QObject):
 
     @Slot('QVariantMap')
     def apply(self, filterForm):
-        merged = AndFilter()
         mapSizeFilter = FilterFormSelectionBuilder()
         teamSizeFilter = FilterFormSelectionBuilder()
         playerFilter = FilterFormSelectionBuilder()
@@ -146,50 +148,11 @@ class ShowMyMapsView(QObject):
         playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["7"])
         playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["8"])
 
-        merged.add(playerFilter.build())
-        merged.add(teamSizeFilter.build())
-        merged.add(mapSizeFilter.build())
-
-        filtered = self.my_maps.filter(merged)
-        summary = {"mapSize": {}, "playerNumber": {}, "teamSize": {}}
-
-        for option in mapSize:
-            f = FilterFormAllBuilder()
-            f.addFilter(MapSizeFilter, mapSize[option])
-            total = AndFilter()
-            total.add(f.build())
-            total.add(playerFilter.build())
-            total.add(teamSizeFilter.build())
-            summary["mapSize"][option] = len(self.my_maps.filter(total))
-
-        for option in teamSize:
-            f = FilterFormAllBuilder()
-            f.addFilter(TeamSizeFilter, teamSize[option])
-            total = AndFilter()
-            total.add(f.build())
-            total.add(playerFilter.build())
-            total.add(mapSizeFilter.build())
-            summary["teamSize"][option] = len(self.my_maps.filter(total))
-
-        for option in playerNumber:
-            f = FilterFormAllBuilder()
-            f.addFilter(TeamPlayerNumberFilter, playerNumber[option])
-            total = AndFilter()
-            total.add(f.build())
-            total.add(teamSizeFilter.build())
-            total.add(mapSizeFilter.build())
-            summary["playerNumber"][option] = len(self.my_maps.filter(total))
-
-        summary["filtered"] = [idx for idx, _ in filtered]
-        self.applied.emit(summary)
+        self.my_maps.filter_summary(playerFilter.build(), teamSizeFilter.build(), mapSizeFilter.build())
 
     @Slot()
     def clear(self):
         self.cleared.emit()
-
-    def _load(self, filePath):
-        header = self.library.load_map(filePath)
-        return _toDict(header)
 
 
 class Display(Protocol):
@@ -208,6 +171,8 @@ class Display(Protocol):
     def show_my_maps_view(self):
         """"""
 
+    def show_filtered_maps(self, summary: dict):
+        """"""
 
 class MyMaps:
     def __init__(self):
@@ -257,8 +222,38 @@ class ShowMyMaps:
         self._reader = Map
         self._display = display
 
-    def filter(self, filter_spec: Filter):
-        return self._maps.filter(filter_spec)
+    def filter_summary(self, number_of_players: Filter = None, team_size: Filter = None, map_size: Filter = None):
+        f = AndFilter()
+        f.add(number_of_players)
+        f.add(team_size)
+        f.add(map_size)
+
+        filtered = self._maps.filter(f)
+        summary = {"mapSize": {}, "playerNumber": {}, "teamSize": {}}
+
+        for option in MapSizeFilter.sizes():
+            total = AndFilter()
+            total.add(MapSizeFilter(option))
+            total.add(number_of_players)
+            total.add(team_size)
+            summary["mapSize"][option] = len(self._maps.filter(total))
+
+        for option in range(0, 8):
+            total = AndFilter()
+            total.add(TeamSizeFilter(option))
+            total.add(number_of_players)
+            total.add(map_size)
+            summary["teamSize"][str(option)] = len(self._maps.filter(total))
+
+        for option in range(0, 8):
+            total = AndFilter()
+            total.add(TeamPlayerNumberFilter(option))
+            total.add(team_size)
+            total.add(map_size)
+            summary["playerNumber"][str(option)] = len(self._maps.filter(total))
+
+        summary["filtered"] = [idx for idx, _ in filtered]
+        self._display.show_filtered_maps(summary)
 
     def import_maps(self, location: str):
         self._maps.save_my_maps_location(location)
