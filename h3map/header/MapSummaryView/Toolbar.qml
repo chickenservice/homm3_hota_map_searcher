@@ -37,7 +37,7 @@ RowLayout {
             model: 5
 
             ToolButton{
-                icon.source: "../../../icons/star.png"
+                icon.source: "../../_QmlComponents/icons/star.png"
                 background: Rectangle {
                     color: "white"
                 }

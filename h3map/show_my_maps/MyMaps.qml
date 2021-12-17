@@ -1,7 +1,7 @@
 import QtQuick 2.12
 import QtQml.Models 2.1
 
-import "Library"
+import "../filtering"
 
 Item {
     property alias maps : filtered
@@ -10,11 +10,9 @@ Item {
 
     property alias delegate: filtered.delegate
 
-    property bool configured: false
+    property bool configured: libraryActions.mapsDirectoryConfigured
 
     required property var libraryActions
-
-    required property var filterActions
 
     ListModel {
         id: maps
@@ -34,14 +32,13 @@ Item {
         filterOnGroup: "filtered"
     }
 
-    FilterModel {
+    Filter {
         id: filters
-        filter: filterActions
+        filter: libraryActions
     }
 
     function importFromFolder(directory) {
-        configured = true
-        libraryActions.importFromFolder(directory)
+        libraryActions.importMaps(directory)
     }
 
     function updateFilter(summary) {
@@ -60,19 +57,9 @@ Item {
         target: libraryActions
 
         function onImportedMap(header) {
-            var item = {
-                "idx": maps.count,
-                "name": header.name,
-                "description": header.description,
-                "players": header.humans,
-                "teams": header.teams,
-                "thumbnail": header.thumbnail}
-            maps.append(item)
+            header.idx = maps.count
+            maps.append(header)
         }
-    }
-
-    Connections {
-        target: filterActions
 
         function onApplied(toFilter) {
             updateFilter(toFilter)

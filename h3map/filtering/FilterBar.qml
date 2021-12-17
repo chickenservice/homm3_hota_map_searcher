@@ -3,13 +3,10 @@ import QtQuick.Dialogs 1.0
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-import "../ViewModels"
-import "../ViewModels/Library"
-import "Components"
 
 Row {
 
-    required property FilterModel filterModel
+    required property Filter filterModel
 
     id: filterBar
 

@@ -3,17 +3,13 @@ import QtQuick.Dialogs 1.0
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-import "ViewModels"
-import "Views"
-import "Views/Components"
-import "Views/Components/MapCard"
+
+import "show_my_maps"
+import "header/MapSummaryView"
+
 
 Rectangle {
-    required property var app
-
     required property var importToLibrary
-
-    required property var filterLibrary
 
     anchors.fill: parent
 
@@ -23,7 +19,7 @@ Rectangle {
         id: logger
 
         Connections {
-            target: filterLibrary
+            target: importToLibrary
 
             function onApplied(summary) {
                 console.log('Filtered items: ', summary["filtered"].length)
@@ -67,18 +63,12 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                LibraryPage {
+                MyMapsView {
                     id: libraryTab
-                    libraryModel: LibraryModel {
+                    libraryModel: MyMaps {
                         libraryActions: importToLibrary
-                        filterActions: filterLibrary
-                        delegate: MapCard {}
+                        delegate: MapSummaryView {}
                     }
-                }
-
-                DiscoverPage {
-                    id: discoverTab
-                    model: app
                 }
             }
         }
@@ -93,7 +83,7 @@ Rectangle {
                 Connections {
                     target: importToLibrary
 
-                    function onImportMaps(maxCount) {
+                    function onImportingMaps(maxCount) {
                         progress.to = maxCount
                     }
 

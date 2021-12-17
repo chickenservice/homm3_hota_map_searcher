@@ -7,7 +7,7 @@ from h3map.header.models import Header, Metadata, Version, MapProperties, Descri
     WhoCanPlay, AiType, FactionInfo, Hero, TeamSetup
 
 from h3map.header.constants import heroes
-from h3map.parser import Parser
+from h3map.show_my_maps.parser import Parser
 
 
 class MapReader(ABC):

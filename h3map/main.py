@@ -3,17 +3,14 @@ import sys
 import cli_ui
 import click
 
-from h3map.cli import ListDetailed, List
-from h3map.library.library import Library
-from h3map.gui.main import QtApp
+from h3map.show_my_maps.show_my_maps import ShowMyMapsView, ShowMyMaps
 
 
 @click.group(invoke_without_command=True)
 @click.pass_context
 def main(ctx):
     if not ctx.invoked_subcommand:
-        #App.run()
-        QtApp.run()
+        ShowMyMaps(ShowMyMapsView()).show()
 
 
 @main.command(name="list")
@@ -40,3 +37,7 @@ def list_maps(files, size, teams, team_players, win, loss, detailed):
 
 if getattr(sys, "frozen", False):
     main(sys.argv[1:])
+
+
+if __name__ == "__main__":
+    ShowMyMaps(ShowMyMapsView()).show()

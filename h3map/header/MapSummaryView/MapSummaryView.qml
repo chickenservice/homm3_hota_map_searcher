@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Layouts 1.3
 
-import ".."
+import "../../_QmlComponents"
 
 Card {
     ColumnLayout {
@@ -21,15 +21,15 @@ Card {
 
         spacing: 2
 
-        Header {
+        MapDetails {
 
         }
 
-        Content {
+        MapDescription {
 
         }
 
-        Footer {
+        Toolbar {
 
         }
     }

@@ -32,8 +32,6 @@ class AsyncFunc(QRunnable):
         self.kwargs = kwargs
         self.signals = AsyncSignals()
 
-        self.kwargs["progress"] = self.signals.progress
-
     @Slot()
     def run(self):
         self.signals.starting.emit()

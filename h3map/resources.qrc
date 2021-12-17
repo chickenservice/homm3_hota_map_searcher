@@ -1,0 +1,33 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>show_my_maps/__init__.py</file>
+        <file>show_my_maps/ChooseMyMapsLocationView.qml</file>
+        <file>show_my_maps/MyMaps.qml</file>
+        <file>show_my_maps/MyMapsView.qml</file>
+        <file>show_my_maps/show_my_maps.py</file>
+        <file>discover_maps_on_websites/discover_maps_on_websites.py</file>
+        <file>discover_maps_on_websites/DiscoverMapsOnWebsites.qml</file>
+        <file>discover_maps_on_websites/DiscoverMapsOnWebsitesView.qml</file>
+        <file>discover_maps_on_websites/maps4heroes.py</file>
+        <file>discover_maps_on_websites/remote_map_loader.py</file>
+        <file>_QmlComponents/icons/hota.gif</file>
+        <file>_QmlComponents/icons/impossible.gif</file>
+        <file>_QmlComponents/icons/mapsize.gif</file>
+        <file>_QmlComponents/icons/players.gif</file>
+        <file>_QmlComponents/icons/star.png</file>
+        <file>_QmlComponents/icons/underworld.gif</file>
+        <file>_QmlComponents/img/default.gif</file>
+        <file>_QmlComponents/Card.qml</file>
+        <file>_QmlComponents/MapListView.qml</file>
+        <file>filtering/FilterBar.qml</file>
+        <file>filtering/FilterComboCheckBox.qml</file>
+        <file>filtering/Filter.qml</file>
+        <file>filtering/FilterOption.qml</file>
+        <file>header/MapSummaryView/MapDescription.qml</file>
+        <file>header/MapSummaryView/Toolbar.qml</file>
+        <file>header/MapSummaryView/MapDetails.qml</file>
+        <file>header/MapSummaryView/MapSummaryView.qml</file>
+        <file>filtering/FilterBarMock.qml</file>
+    </qresource>
+</RCC>

@@ -69,6 +69,10 @@ class TeamSetup(ABC):
     teams: List[int]
 
     @property
+    def possible_teams(self):
+        return map(self.teams, )
+
+    @property
     def alliance_possible(self):
         return self.number_of_teams > 0
 

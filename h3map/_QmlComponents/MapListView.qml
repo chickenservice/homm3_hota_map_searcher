@@ -5,7 +5,6 @@ import QtGraphicalEffects 1.12
 import QtQuick.Layouts 1.15
 import QtQuick.Shapes 1.10
 
-import "MapCard"
 
 GridView {
     id: mapListView
@@ -35,8 +34,8 @@ GridView {
         var totalHeight = ((height / cellHeight) * (count / (width / cellWidth)))
         return (contentY + height) >= totalHeight
     }
+
     add: Transition {
-        id: populateTrans
         NumberAnimation { properties: "scale"; from: 0; to: 1.0; duration: 400 }
         NumberAnimation { properties: "opacity"; from: 0; to: 1.0; duration: 400 }
     }

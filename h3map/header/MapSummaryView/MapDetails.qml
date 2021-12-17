@@ -6,7 +6,7 @@ Row {
     spacing: 2
 
     Image {
-        source: "../../../img/" + model.thumbnail
+        source: "../../_QmlComponents/img/" + model.thumbnail
         sourceSize.width: 128
         fillMode: Image.PreserveAspectFit
     }
@@ -28,7 +28,7 @@ Row {
         Column {
             Row {
                 Image {
-                    source: "../../../icons/players.gif"
+                    source: "../../_QmlComponents/icons/players.gif"
                 }
 
                 Text {

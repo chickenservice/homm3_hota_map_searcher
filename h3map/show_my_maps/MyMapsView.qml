@@ -3,13 +3,13 @@ import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.0
 import QtQml.Models 2.1
 
-import "../ViewModels"
-import "Components"
-import "Components/MapCard"
+import "../_QmlComponents"
+import "../filtering"
+
 
 Item {
 
-    required property LibraryModel libraryModel
+    required property MyMaps libraryModel
 
     states: [
         State {
@@ -65,7 +65,7 @@ Item {
     }
 
 
-    ChooseLibraryPage {
+    ChooseMyMapsLocationView {
         id: chooseLibrary
         visible: true
         onLibraryPathChosen: libraryModel.importFromFolder(path)

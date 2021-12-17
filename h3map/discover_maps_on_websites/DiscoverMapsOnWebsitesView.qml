@@ -1,13 +1,13 @@
 import QtQuick 2.0
 
-import "../ViewModels"
-import "Components"
+
+import "../_QmlComponents"
 
 
 Item {
     required property var model
 
-    DiscoverModel {
+    DiscoverMapsOnWebsites {
         id: onlineModel
         dispatcher: model
     }

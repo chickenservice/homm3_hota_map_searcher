@@ -1,7 +1,5 @@
 import QtQuick 2.0
 
-import "../"
-
 Item {
     required property var filter
 
@@ -11,7 +9,7 @@ Item {
 
     property alias mapSizeOptions: mapSize.filterOptions
 
-    FilterOptionModel {
+    FilterOption {
         id: amountOfPlayers
         filterOptions: ListModel {
             ListElement { name: 0; selected: false; value: 0; count: 0 }
@@ -47,7 +45,7 @@ Item {
         }
     }
 
-    FilterOptionModel {
+    FilterOption {
         id: teamSize
         filterOptions: ListModel {
             ListElement { name: 0; selected: false; value: 0;  count: 0}
@@ -83,7 +81,7 @@ Item {
         }
     }
 
-    FilterOptionModel {
+    FilterOption {
         id: mapSize
         filterOptions: ListModel {
             ListElement {
