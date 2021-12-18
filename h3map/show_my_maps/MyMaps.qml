@@ -61,6 +61,10 @@ Item {
             maps.append(header)
         }
 
+        function onImportedMaps() {
+            filters.apply()
+        }
+
         function onApplied(toFilter) {
             updateFilter(toFilter)
         }

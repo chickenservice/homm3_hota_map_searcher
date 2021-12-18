@@ -3,24 +3,25 @@ import QtQuick 2.0
 Item {
     required property var filter
 
-    property alias amountOfPlayerOptions: amountOfPlayers.filterOptions
+    property alias amountOfPlayerOptions: amountOfPlayers
 
-    property alias teamSizeOptions: teamSize.filterOptions
+    property alias teamSizeOptions: teamSize
 
-    property alias mapSizeOptions: mapSize.filterOptions
+    property alias mapSizeOptions: mapSize
 
     FilterOption {
         id: amountOfPlayers
+        name: "Players"
         filterOptions: ListModel {
-            ListElement { name: 0; selected: false; value: 0; count: 0 }
-            ListElement { name: 1; selected: false; value: 1; count: 0 }
-            ListElement { name: 2; selected: false; value: 2; count: 0 }
-            ListElement { name: 3; selected: false; value: 3; count: 0 }
-            ListElement { name: 4; selected: false; value: 4; count: 0 }
-            ListElement { name: 5; selected: false; value: 5; count: 0 }
-            ListElement { name: 6; selected: false; value: 6; count: 0 }
-            ListElement { name: 7; selected: false; value: 7; count: 0 }
-            ListElement { name: 8; selected: false; value: 8; count: 0 }
+            ListElement { name: 0; selected: false; value: 0; count: 0; enabled: false }
+            ListElement { name: 1; selected: false; value: 1; count: 0; enabled: false }
+            ListElement { name: 2; selected: false; value: 2; count: 0; enabled: false }
+            ListElement { name: 3; selected: false; value: 3; count: 0; enabled: false }
+            ListElement { name: 4; selected: false; value: 4; count: 0; enabled: false }
+            ListElement { name: 5; selected: false; value: 5; count: 0; enabled: false }
+            ListElement { name: 6; selected: false; value: 6; count: 0; enabled: false }
+            ListElement { name: 7; selected: false; value: 7; count: 0; enabled: false }
+            ListElement { name: 8; selected: false; value: 8; count: 0; enabled: false }
         }
 
         Connections {
@@ -37,6 +38,7 @@ Item {
                 amountOfPlayers.filterOptions.setProperty(6, 'count', data[6])
                 amountOfPlayers.filterOptions.setProperty(7, 'count', data[7])
                 amountOfPlayers.filterOptions.setProperty(8, 'count', data[8])
+                amountOfPlayers.setAvailableOptions()
             }
 
             function onCleared() {
@@ -47,16 +49,17 @@ Item {
 
     FilterOption {
         id: teamSize
+        name: "Teams"
         filterOptions: ListModel {
-            ListElement { name: 0; selected: false; value: 0;  count: 0}
-            ListElement { name: 1; selected: false; value: 1;  count: 0}
-            ListElement { name: 2; selected: false; value: 2;  count: 0}
-            ListElement { name: 3; selected: false; value: 3;  count: 0}
-            ListElement { name: 4; selected: false; value: 4;  count: 0}
-            ListElement { name: 5; selected: false; value: 5;  count: 0}
-            ListElement { name: 6; selected: false; value: 6;  count: 0}
-            ListElement { name: 7; selected: false; value: 7;  count: 0}
-            ListElement { name: 8; selected: false; value: 8;  count: 0}
+            ListElement { name: 0; selected: false; value: 0;  count: 0; enabled: false }
+            ListElement { name: 1; selected: false; value: 1;  count: 0; enabled: false }
+            ListElement { name: 2; selected: false; value: 2;  count: 0; enabled: false }
+            ListElement { name: 3; selected: false; value: 3;  count: 0; enabled: false }
+            ListElement { name: 4; selected: false; value: 4;  count: 0; enabled: false }
+            ListElement { name: 5; selected: false; value: 5;  count: 0; enabled: false }
+            ListElement { name: 6; selected: false; value: 6;  count: 0; enabled: false }
+            ListElement { name: 7; selected: false; value: 7;  count: 0; enabled: false }
+            ListElement { name: 8; selected: false; value: 8;  count: 0; enabled: false }
         }
 
         Connections {
@@ -73,6 +76,7 @@ Item {
                 teamSize.filterOptions.setProperty(6, 'count', data[6])
                 teamSize.filterOptions.setProperty(7, 'count', data[7])
                 teamSize.filterOptions.setProperty(8, 'count', data[8])
+                teamSize.setAvailableOptions()
             }
 
             function onCleared() {
@@ -83,30 +87,35 @@ Item {
 
     FilterOption {
         id: mapSize
+        name: "Map Size"
         filterOptions: ListModel {
             ListElement {
                 name: "XL"
                 selected: false
                 value: "XL"
                 count: 0
+                enabled: false
             }
             ListElement {
                 name: "L"
                 selected: false
                 value: "L"
                 count: 0
+                enabled: false
             }
             ListElement {
                 name: "M"
                 selected: false
                 value: "M"
                 count: 0
+                enabled: false
             }
             ListElement {
                 name: "S"
                 selected: false
                 value: "S"
                 count: 0
+                enabled: false
             }
         }
 
@@ -119,12 +128,17 @@ Item {
                 mapSize.filterOptions.setProperty(1, 'count', data['L'])
                 mapSize.filterOptions.setProperty(2, 'count', data['M'])
                 mapSize.filterOptions.setProperty(3, 'count', data['S'])
+                mapSize.setAvailableOptions()
             }
 
             function onCleared() {
                 mapSize.clearAll()
             }
         }
+    }
+
+    function checkEnabled(count) {
+        return count > 0
     }
 
     function toggleAmountOfPlayers(index) {
@@ -152,5 +166,10 @@ Item {
 
     function clear() {
         filter.clear()
+        filter.apply({
+            playerNumberOptions: amountOfPlayers.getSelection(),
+            teamSizeOptions: teamSize.getSelection(),
+            mapSizeOptions: mapSize.getSelection()
+         })
     }
 }

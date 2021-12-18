@@ -15,7 +15,7 @@ Row {
     FilterComboCheckBox {
         filterName: "Players"
 
-        model: filterModel.amountOfPlayerOptions
+        options: filterModel.amountOfPlayerOptions
 
         onActivated: {
             filterModel.toggleAmountOfPlayers(index)
@@ -25,7 +25,7 @@ Row {
     FilterComboCheckBox {
         filterName: "Teams"
 
-        model: filterModel.teamSizeOptions
+        options: filterModel.teamSizeOptions
 
         onActivated: {
             filterModel.toggleTeamSize(index)
@@ -35,7 +35,7 @@ Row {
     FilterComboCheckBox {
         filterName: "Map Size"
 
-        model: filterModel.mapSizeOptions
+        options: filterModel.mapSizeOptions
 
         onActivated: {
             filterModel.toggleMapSize(index)

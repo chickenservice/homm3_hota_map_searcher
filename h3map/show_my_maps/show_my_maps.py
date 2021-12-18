@@ -59,6 +59,7 @@ class FilterFormAllBuilder:
 class ShowMyMapsView(QObject):
     importingMaps = Signal(int)
     importedMap = Signal('QVariantMap')
+    importedMaps = Signal()
     configuredChanged = Signal()
 
     applied = Signal('QVariantMap')
@@ -102,6 +103,9 @@ class ShowMyMapsView(QObject):
 
     def show_amount_of_maps_to_import(self, amount: int):
         self.importingMaps.emit(amount)
+
+    def successful_import(self):
+        self.importedMaps.emit()
 
     @Property(bool, notify=configuredChanged)
     def mapsDirectoryConfigured(self):
@@ -173,6 +177,9 @@ class Display(Protocol):
 
     def show_filtered_maps(self, summary: dict):
         """"""
+
+    def successful_import(self):
+        pass
 
 class MyMaps:
     def __init__(self):
@@ -264,6 +271,8 @@ class ShowMyMaps:
             header = self._reader.read(map_)
             self._maps.add(header)
             self._display.show_map_overview(header)
+
+        self._display.successful_import()
 
     def show(self):
         if not self._maps.has_location:

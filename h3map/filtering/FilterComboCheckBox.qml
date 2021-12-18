@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 
 
 ComboBox {
@@ -7,11 +8,15 @@ ComboBox {
 
     required property string filterName
 
+    required property FilterOption options
+
+    model: options.filterOptions
+
     height: 50
 
     popup: Popup {
-        y: control.height - 10
-        width: control.width
+        y: control.height + 10
+        width: control.width + 50
         implicitHeight: contentItem.implicitHeight
         padding: 1
 
@@ -20,8 +25,6 @@ ComboBox {
             implicitHeight: contentHeight
             model: control.popup.visible ? control.delegateModel : null
             currentIndex: control.highlightedIndex
-
-            ScrollIndicator.vertical: ScrollIndicator { }
         }
 
         background: Rectangle {
@@ -30,15 +33,6 @@ ComboBox {
 
             border.width: 3
             border.color: '#dddddd'
-
-            Rectangle {
-                width: parent.width - 6
-                height: parent.height - 6
-                x: parent.x + 3
-                y: parent.y - 5
-
-                radius: 10
-            }
         }
     }
 
@@ -67,50 +61,52 @@ ComboBox {
     }
 
     contentItem: Text {
-        text: control.filterName
+        text: options.activeOptions
         font: control.font
         color: 'grey'
         verticalAlignment: Text.AlignVCenter
-        horizontalAlignment: Text.AlignHCenter
+        horizontalAlignment: Text.AlignLeft
         elide: Text.ElideRight
     }
 
     background: Rectangle {
-        implicitWidth: 120
+        implicitWidth: 150
         implicitHeight: 40
-        border.color: '#dddddd'
+        border.color: options.color
         border.width: 3
         radius: 10
     }
 
-    delegate: Item {
+    delegate: RowLayout {
         width: parent.width
         height: 50
+        Layout.fillWidth: true
 
-        Row {
-            CheckBox {
-                id: filterSelected
-                checked: selected
-                onClicked: {
-                    control.activated(index)
-                }
+        CheckBox {
+            id: filterSelected
+            checked: selected
+            enabled: model.enabled
+            onClicked: {
+                control.activated(index)
             }
+        }
 
-            Image {
-                source: model.icon
-            }
+        Image {
+            source: model.icon
+        }
 
-            Label {
-                text: name
-                verticalAlignment: Qt.AlignVCenter
-                horizontalAlignment: Qt.AlignHCenter
-            }
+        Label {
+            id: filterName
+            text: name
+            Layout.fillWidth: true
+            horizontalAlignment: Qt.AlignBottom
+        }
 
-            Label {
-                text: count
-                padding: { left: 5; right: 5 }
-                horizontalAlignment: Qt.AlignRight
-            }
+        Label {
+            text: count
+            color: 'grey'
+            Layout.rightMargin: 10
+            horizontalAlignment: Qt.AlignBottom
         }
     }
 }
