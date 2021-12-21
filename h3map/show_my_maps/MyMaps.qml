@@ -62,7 +62,7 @@ Item {
         }
 
         function onImportedMaps() {
-            filters.apply()
+            //filters.apply()
         }
 
         function onApplied(toFilter) {
@@ -72,5 +72,9 @@ Item {
         function onCleared() {
             clearFilter()
         }
+    }
+
+    Component.onCompleted: {
+        libraryActions.maps()
     }
 }

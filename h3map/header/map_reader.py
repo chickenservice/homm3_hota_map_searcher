@@ -1,5 +1,7 @@
 from abc import ABC
 
+import chardet
+
 import h3map
 from h3map.header.conditions_readers.loss_conditions import loss_condition_readers, StandardLossConditionReader
 from h3map.header.conditions_readers.winning_conditions import StandardWinningConditionReader, winning_condition_readers
@@ -52,7 +54,10 @@ class MapReader(ABC):
     def read_description(self):
         name = self.parser.string()
         desc = self.parser.string()
-        return Description(name.decode("latin-1"), desc.decode("latin-1"))
+        nameenc = chardet.detect(name)['encoding'] or 'utf-8'
+        descenc = chardet.detect(desc)['encoding'] or 'utf-8'
+
+        return Description(name.decode(nameenc), desc.decode(descenc))
 
     def read_difficulty(self):
         diff = self.parser.uint8()
@@ -68,6 +73,7 @@ class MapReader(ABC):
                 continue
 
             player = PlayerInfo(
+                player_num,
                 who_can_play,
                 self.read_ai_type(),
                 self.read_faction_info(),

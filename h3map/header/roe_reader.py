@@ -26,13 +26,13 @@ class RoeReader(MapReader):
                 self.parser.skip(6)
                 continue
 
-            ai = self.read_ai_type(),
-            faction = self.read_faction_info(),
-            hero = self.read_hero_properties(),
-            town = self.read_town_info(),
+            ai = self.read_ai_type()
+            faction = self.read_faction_info()
+            hero = self.read_hero_properties()
+            town = self.read_town_info()
             heroes = self.read_heroes_belonging_to_player(town, hero)
 
-            player = PlayerInfo(who_can_play, ai, faction, hero, town, heroes)
+            player = PlayerInfo(player_num, who_can_play, ai, faction, town, hero, heroes)
             players.append(player)
 
         return players

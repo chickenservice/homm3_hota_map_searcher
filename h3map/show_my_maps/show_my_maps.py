@@ -1,17 +1,23 @@
 import glob
 import gzip
+import json
+import os.path
 import sys
 from pathlib import Path
-from typing import Protocol
+from typing import Protocol, List, Union
 
 from PySide2.QtCore import Slot, QThreadPool, QObject, Signal, QSize, QUrl, Property
 from PySide2.QtQuick import QQuickView
 from PySide2.QtWidgets import QApplication
+from sqlalchemy.orm import sessionmaker
 
 from h3map.asyncFunc import AsyncFunc
 from h3map.filtering.filter import Filter, AndFilter, MapSizeFilter, TeamSizeFilter, TeamPlayerNumberFilter
 from h3map.header.map_reader import MapReader
-from h3map.header.models import Header
+from h3map.header.models import Header, Metadata, TeamSetup, Description, StandardWinningCondition, \
+    StandardLossCondition
+from h3map.heroes3 import Player, engine, PlayerColor, Town, Map, MapSize, Version, Difficulty, WinningCondition, \
+    LossCondition, Team, Config
 
 
 def _toDict(header: Header, idx=0):
@@ -21,10 +27,21 @@ def _toDict(header: Header, idx=0):
     header_dict["description"] = header.metadata.description.summary
     header_dict["humans"] = 0
     header_dict["teams"] = header.teams.number_of_teams
-    header_dict["teams"] = header.teams.number_of_teams
     header_dict["thumbnail"] = "default.gif"
 
     return header_dict
+
+
+def _to_header(d: dict):
+    description = Description(d["name"], d["description"])
+    metadata = Metadata(0, None, description, None)
+    metadata.description.name = d["name"]
+    metadata.description.summary = d["description"]
+
+    teams = TeamSetup(d["teams"], None)
+    teams.number_of_teams = d["teams"]
+
+    return Header(metadata, None, teams, None, None)
 
 
 class FilterFormSelectionBuilder:
@@ -71,6 +88,15 @@ class ShowMyMapsView(QObject):
         self.my_maps = None
         self._maps_configured = True
 
+    @Slot()
+    def maps(self):
+        if self.my_maps and self.mapsDirectoryConfigured:
+            def _async():
+                #self.my_maps.import_new_maps()
+                self.my_maps.load()
+
+            self.threadpool.start(AsyncFunc(_async))
+
     def show_my_maps(self, my_maps):
         self.my_maps = my_maps
 
@@ -99,7 +125,7 @@ class ShowMyMapsView(QObject):
         self.applied.emit(summary)
 
     def show_map_overview(self, header):
-        self.importedMap.emit(_toDict(header))
+        self.importedMap.emit(header)
 
     def show_amount_of_maps_to_import(self, amount: int):
         self.importingMaps.emit(amount)
@@ -114,7 +140,7 @@ class ShowMyMapsView(QObject):
     @Slot(str)
     def importMaps(self, path):
         def _import():
-            self.my_maps.import_maps(path)
+            self.my_maps.import_maps(path[8:])
 
         self.threadpool.start(AsyncFunc(_import))
 
@@ -181,26 +207,98 @@ class Display(Protocol):
     def successful_import(self):
         pass
 
-class MyMaps:
+
+class MyMapsLocation(Protocol):
+    @property
+    def has_location(self) -> bool:
+        """Has user set his maps location?"""
+
+    @property
+    def location(self) -> str:
+        """Location of the users maps"""
+
+    def save_my_maps_location(self, directory: str):
+        """Save the users' original maps location. For now he can only have exactly one location."""
+
+
+class ReadStore(Protocol):
+    def names(self) -> List[str]:
+        """"""
+
+    def count(self) -> int:
+        """Amount of maps in store"""
+
+    def has(self, path) -> bool:
+        """"""
+
+    def all(self) -> List[Header]:
+        """Gives a list of the users maps"""
+
+
+class WriteStore(Protocol):
+    def add(self, header: Header):
+        """Store a users map"""
+
+
+class MyMapsFilter(Protocol):
+    def filter(self, filter_spec: Filter) -> List[Header]:
+        """Get maps based on given filter"""
+
+
+class MyMapsInDirectory:
     def __init__(self):
-        self.maps = []
-        self._idx = {}
         self._library_dir = ""
 
     @property
     def has_location(self):
         return len(self._library_dir)
 
+    @property
+    def location(self) -> str:
+        return self._library_dir
+
+    def names(self):
+        path = Path(self._library_dir) / "*.h3m"
+        return [name for name in os.path.splitext(os.path.basename(path))[0]]
+
+    def has(self, name):
+        return True
+
     def save_my_maps_location(self, directory):
         self._library_dir = directory
 
-    def list(self):
-        exp = str(Path(self._library_dir) / "*.h3m")
-        return glob.glob(exp[8:])
+    def count(self):
+        path = Path(self._library_dir) / "*.h3m"
+        return len(glob.glob(str(path)))
+
+    def all(self) -> List[Header]:
+        path = Path(self._library_dir) / "*.h3m"
+        maps_in_directory = glob.glob(str(path))
+        for map_ in maps_in_directory:
+            yield self._read(map_)
+
+    @staticmethod
+    def _read(path):
+        try:
+            map_contents = gzip.open(path, 'rb').read()
+            header: Header = MapReader.parse(map_contents)
+            header.file_path = path
+            return header
+        except Exception as e:
+            print("Sorry map couldn't be loaded for " + path + " due to an error: ", e)
+
+
+class MyMapsInMemory:
+    def __init__(self):
+        self.maps = []
+        self._idx = {}
 
     def add(self, header: Header):
         self.maps.append(header)
         self._idx[header.metadata.description.name] = len(self.maps) - 1
+
+    def count(self):
+        return len(self.maps)
 
     def all(self):
         return self.maps
@@ -213,29 +311,137 @@ class MyMaps:
         return self._idx[header.metadata.description.name]
 
 
-class Map:
-    @staticmethod
-    def read(path):
-        try:
-            map_contents = gzip.open(path, 'rb').read()
-            return MapReader.parse(map_contents)
-        except Exception as e:
-            print("Sorry map couldn't be loaded for " + path + " due to an error: ", e)
+class MyMapsJson:
+    def __init__(self):
+        self._storage_path = "C:/Users/aless/Projects/Homm3_Hota_Map_Searcher/.cache"
+
+    @property
+    def has_location(self) -> bool:
+        return True if len(self.location) else False
+
+    @property
+    def location(self):
+        path: Path = self._path()
+        if not path.exists():
+            return ""
+
+        with open(path, 'r') as fp:
+            config = json.load(fp)
+
+        return config["my maps"]
+
+    def save_my_maps_location(self, directory: str):
+        path: Path = self._path()
+        with open(path, 'w') as fp:
+            json.dump({"my maps": directory, "headers": {}}, fp)
+
+    def names(self):
+        headers = self.all()
+        return [os.path.splitext(name.file_path)[0] for name in headers]
+
+    def has(self, name):
+        return name in self.names()
+
+    def add(self, header: Header):
+        header_as_dict = _toDict(header)
+        with open(self._path(), 'r') as fp:
+            h3m = json.load(fp)
+        with open(self._path(), 'w') as fp:
+            h3m["headers"][header_as_dict["name"]] = header_as_dict
+            json.dump(h3m, fp)
+
+    def count(self):
+        path = Path(self._storage_path) / "*.json"
+        return len(glob.glob(path))
+
+    def all(self):
+        headers = []
+        with open(self._path()) as fp:
+            h3m = json.load(fp)
+            for header in h3m["headers"].values():
+                headers.append(_to_header(header))
+
+        return headers
+
+    def _path(self):
+        return Path(self._storage_path) / "h3map.json"
+
+
+class MyMapsSqlite:
+    def __init__(self):
+        self._sqlite_db_path = "C:/Users/aless/Projects/Homm3_Hota_Map_Searcher/.cache/h3map.db"
+        self._session = sessionmaker(bind=engine)
+
+    @property
+    def has_location(self) -> bool:
+        with self._session() as session, session.begin():
+            return session.query(Config).count() > 0
+
+    @property
+    def location(self) -> str:
+        with self._session() as session, session.begin():
+            return session.query(Config.maps_location).first()
+
+    def save_my_maps_location(self, directory: str):
+        with self._session() as session, session.begin():
+            session.add(Config(maps_location=directory))
+
+    def add(self, header: Header):
+        players = []
+        with self._session() as session, session.begin():
+            for player in header.players_info:
+                color = session.query(PlayerColor).where(PlayerColor.id == player.id+1).first()
+                team = session.query(Team).where(Team.id == header.teams.teams[player.id]).first() if header.teams.number_of_teams > 1 else None
+                towns = session.query(Town).filter(Town.name.in_(player.faction_info.factions)).all()
+                p = Player(player_color=color, team=team, towns=towns)
+                players.append(p)
+
+            map_ = Map(name=header.metadata.description.name,
+                       description=header.metadata.description.summary,
+                       any_players=header.metadata.properties.any_players,
+                       version=session.query(Version).where(Version.version == header.metadata.version.version).first(),
+                       difficulty=session.query(Difficulty).where(Difficulty.difficulty == header.metadata.difficulty.difficulty).first(),
+                       map_size=session.query(MapSize).where(MapSize.size == header.metadata.properties.size).first(),
+                       players=players,
+                       )
+            session.add(map_)
+
+    def all(self):
+        with self._session() as session, session.begin():
+            maps = session.query(Map).all()
+            ms = []
+            for m in maps:
+                ms.append(self._to_dict(m))
+            return ms
+
+    def _to_dict(self, m: Map):
+        header_dict = {}
+        header_dict["idx"] = m.id
+        header_dict["name"] = m.name
+        header_dict["description"] = m.description
+        header_dict["humans"] = 0
+        header_dict["teams"] = 0
+        header_dict["thumbnail"] = "default.gif"
+
+        return header_dict
 
 
 class ShowMyMaps:
     def __init__(self, display: Display):
-        self._maps = MyMaps()
-        self._reader = Map
+        self._maps = MyMapsInDirectory()
+        self._store = MyMapsJson()
+        self._cache = MyMapsInMemory()
         self._display = display
 
     def filter_summary(self, number_of_players: Filter = None, team_size: Filter = None, map_size: Filter = None):
+        map_filter: MyMapsFilter = self._cache
+
         f = AndFilter()
         f.add(number_of_players)
         f.add(team_size)
         f.add(map_size)
 
-        filtered = self._maps.filter(f)
+        filtered = map_filter.filter(f)
         summary = {"mapSize": {}, "playerNumber": {}, "teamSize": {}}
 
         for option in MapSizeFilter.sizes():
@@ -243,42 +449,87 @@ class ShowMyMaps:
             total.add(MapSizeFilter(option))
             total.add(number_of_players)
             total.add(team_size)
-            summary["mapSize"][option] = len(self._maps.filter(total))
+            summary["mapSize"][option] = len(map_filter.filter(total))
 
         for option in range(0, 8):
             total = AndFilter()
             total.add(TeamSizeFilter(option))
             total.add(number_of_players)
             total.add(map_size)
-            summary["teamSize"][str(option)] = len(self._maps.filter(total))
+            summary["teamSize"][str(option)] = len(map_filter.filter(total))
 
         for option in range(0, 8):
             total = AndFilter()
             total.add(TeamPlayerNumberFilter(option))
             total.add(team_size)
             total.add(map_size)
-            summary["playerNumber"][str(option)] = len(self._maps.filter(total))
+            summary["playerNumber"][str(option)] = len(map_filter.filter(total))
 
         summary["filtered"] = [idx for idx, _ in filtered]
         self._display.show_filtered_maps(summary)
 
     def import_maps(self, location: str):
-        self._maps.save_my_maps_location(location)
-        self._display.show_my_maps_view()
-        maps_to_import = self._maps.list()
-        self._display.show_amount_of_maps_to_import(len(maps_to_import))
-        for map_ in maps_to_import:
-            header = self._reader.read(map_)
-            self._maps.add(header)
-            self._display.show_map_overview(header)
+        my_location: Union[MyMapsLocation, ReadStore] = self._maps
+        display: Display = self._display
+        store: Union[WriteStore, MyMapsLocation] = MyMapsSqlite()
+        cache: WriteStore = self._cache
 
-        self._display.successful_import()
+        my_location.save_my_maps_location(location)
+        store.save_my_maps_location(location)
+        display.show_my_maps_view()
+        display.show_amount_of_maps_to_import(my_location.count())
+        for map_ in self._maps.all():
+            store.add(map_)
+            cache.add(map_)
+            display.show_map_overview(_toDict(map_))
+
+        display.successful_import()
+
+    def import_new_maps(self):
+        """TODO: unfinished check for new maps"""
+        my_location: Union[MyMapsLocation, ReadStore] = self._maps
+        display: Display = self._display
+        store: Union[WriteStore, ReadStore, MyMapsLocation] = self._store
+        cache: WriteStore = self._cache
+
+        my_location.save_my_maps_location(store.location)
+
+        new = [new_ for new_ in my_location.all() if store.has(new_)]
+        display.show_amount_of_maps_to_import(len(new))
+        for map_ in my_location.all():
+            store.add(map_)
+            cache.add(map_)
+            display.show_map_overview(map_)
+
+        display.successful_import()
+
+    def load(self):
+        display: Display = self._display
+        store: Union[ReadStore, MyMapsLocation] = MyMapsSqlite()
+
+        display.show_my_maps_view()
+        for map_ in store.all():
+            display.show_map_overview(map_)
+
+        display.successful_import()
+
+    def maps(self):
+        return self._cache.maps
 
     def show(self):
-        if not self._maps.has_location:
-            self._display.please_set_your_maps_location()
+        store: MyMapsLocation = MyMapsSqlite()
+        display: Display = self._display
 
-        self._display.show_my_maps(self)
+        if not store.has_location:
+            display.please_set_your_maps_location()
+
+        display.show_my_maps(self)
+
+    def _scan_new_maps(self):
+        directory: MyMapsLocation = self._maps
+        store: MyMapsLocation = self._store
+
+        return [new for new in directory.listing() if not store.has(new)]
 
 
 if __name__ == "__main__":

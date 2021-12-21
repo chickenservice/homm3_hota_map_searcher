@@ -59,8 +59,8 @@ class TownInfo(ABC):
 
 @dataclass
 class FactionInfo(ABC):
-    is_faction_random: bool
     factions: List[str]
+    is_faction_random: bool
 
 
 @dataclass
@@ -116,6 +116,7 @@ class WhoCanPlay(ABC):
 
 @dataclass
 class PlayerInfo(ABC):
+    id: int
     who_can_play: WhoCanPlay
     ai_type: AiType
     faction_info: FactionInfo
@@ -290,6 +291,7 @@ class Header(ABC):
     teams: TeamSetup
     allowed_heroes: List[str]
     conditions: List[Condition]
+    file_path: str = ""
 
     def humans(self):
         return len([player for player in self.players_info if player.who_can_play.can_human_play])
