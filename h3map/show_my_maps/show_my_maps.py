@@ -406,7 +406,11 @@ class MyMapsSqlite:
             maps = session.query(Map).all()
             ms = []
             for m in maps:
-                teams = session.query(Map.id).outerjoin(Map.players).where(Map.id == m.id).group_by(Map.id).having(func.count(distinct(Player.team_id))).count()
+                teams = session.query(Player.id, Player.team_id) \
+                    .filter(Player.map_id == m.id) \
+                    .distinct(Player.team_id) \
+                    .group_by(Player.team_id) \
+                    .count()
                 ms.append(self._to_dict(m, teams=teams))
             return ms
 
