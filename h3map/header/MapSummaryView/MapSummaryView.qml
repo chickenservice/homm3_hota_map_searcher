@@ -28,9 +28,5 @@ Card {
         MapDescription {
 
         }
-
-        Toolbar {
-
-        }
     }
 }

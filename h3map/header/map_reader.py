@@ -4,7 +4,8 @@ import chardet
 
 import h3map
 from h3map.header.conditions_readers.loss_conditions import loss_condition_readers, StandardLossConditionReader
-from h3map.header.conditions_readers.winning_conditions import StandardWinningConditionReader, winning_condition_readers
+from h3map.header.conditions_readers.winning_conditions import StandardWinningConditionReader, \
+    winning_condition_readers, AccumulateResourcesReader, AccumulateCreaturesReader, AcquireSpecificArtifactReader
 from h3map.header.models import Header, Metadata, Version, MapProperties, Description, Difficulty, PlayerInfo, \
     WhoCanPlay, AiType, FactionInfo, Hero, TeamSetup
 
@@ -61,7 +62,9 @@ class MapReader(ABC):
 
     def read_difficulty(self):
         diff = self.parser.uint8()
-        max_level = self.parser.uint8()
+        max_level = 4
+        if self.read_version().version != 14:
+            max_level = self.parser.uint8()
         return Difficulty(diff, max_level)
 
     def read_player_infos(self):
@@ -142,9 +145,15 @@ class MapReader(ABC):
     def read_teams(self):
         number_of_teams = self.parser.uint8()
         teams = []
-        for player in range(0, 8):
-            team_id = self.parser.uint8()
-            teams.append(team_id)
+        if number_of_teams > 0:
+            for player in range(0, 8):
+                team_id = self.parser.uint8()
+                if team_id == 255:
+                    team_id = 7
+                teams.append(team_id)
+        else:
+            for player in range(0, 8):
+                teams.append(player)
 
         return TeamSetup(number_of_teams, teams)
 
@@ -176,6 +185,9 @@ class MapReader(ABC):
 
     def read_winning_condition(self):
         winning_reader = self._read_winning_condition()
+        if isinstance(winning_reader, AcquireSpecificArtifactReader) or isinstance(winning_reader, AccumulateCreaturesReader):
+            if self.version != 14:
+                return winning_reader.read(skip=1)
         return winning_reader.read()
 
     def _read_winning_condition(self):

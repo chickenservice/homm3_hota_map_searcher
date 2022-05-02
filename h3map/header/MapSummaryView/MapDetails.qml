@@ -25,22 +25,39 @@ Row {
             wrapMode: Text.WordWrap
         }
 
-        Column {
-            Row {
-                Image {
-                    source: "../../_QmlComponents/icons/players.gif"
-                }
-
-                Text {
-                    text: "Teams: " + model.teams
-                    font.italic: true
-                }
+        Row {
+            spacing: 15
+        Column{
+            Text {
+                text: "Teams: " + model.teams
+                font.italic: true
             }
 
             Text {
-                text: "Human Players: " + model.humans
+                text: "Players: " + model.players
+                font.italic: true
+            }
+
+            Text {
+                text: "Humans: " + model.humans
+                font.italic: true
+            }
+
+            }
+        Column {
+
+            Text {
+                text: "Map size: " + model.size
+                font.italic: true
+            }
+
+            Text {
+                text: "Difficulty: " + model.difficulty
                 font.italic: true
             }
         }
+
+        }
+
     }
 }

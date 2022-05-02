@@ -28,11 +28,10 @@ class RoeReader(MapReader):
 
             ai = self.read_ai_type()
             faction = self.read_faction_info()
-            hero = self.read_hero_properties()
             town = self.read_town_info()
-            heroes = self.read_heroes_belonging_to_player(town, hero)
+            hero = self.read_hero_properties()
 
-            player = PlayerInfo(player_num, who_can_play, ai, faction, town, hero, heroes)
+            player = PlayerInfo(player_num, who_can_play, ai, faction, town, hero, None)
             players.append(player)
 
         return players
@@ -55,17 +54,6 @@ class RoeReader(MapReader):
             self.parser.uint8()
 
         return TownInfo(has_main_town)
-
-    def read_heroes_belonging_to_player(self, town_info, hero_type):
-        if town_info and hero_type != 255:
-            _id = self.parser.uint8()
-        elif not town_info and hero_type != 255:
-            _id = self.parser.uint8()
-
-    def read_hero_properties(self):
-        has_random_hero = self.parser.bool()
-        hero_type = self.parser.uint8()
-        return HeroInfo(has_random_hero, hero_type)
 
     def get_allowed_factions(self):
         total = self.parser.uint8()

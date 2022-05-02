@@ -62,41 +62,6 @@ class AndFilter(FilterStrategy):
         return result
 
 
-class HeaderFilter:
-    def __init__(self):
-        self.filters = []
-
-    def has_team_size(self, size):
-        team_size = TeamSizeFilter(size)
-        self._add_filter(team_size)
-
-    def has_map_size(self, size):
-        map_size = MapSizeFilter(size)
-        self._add_filter(map_size)
-
-    def alliances_possible(self):
-        team_size = TeamSizeFilter(2)
-        self._add_filter(team_size)
-
-    def has_win_or_loss_condition(self, condition):
-        winning_condition = WinLossConditionFilter(condition)
-        self._add_filter(winning_condition)
-
-    def team_has_players(self, players):
-        players_per_team = TeamPlayerNumberFilter(players)
-        self._add_filter(players_per_team)
-
-    def apply(self, headers: List[Header]):
-        _headers = headers
-        for _filter in self.filters:
-            _headers = _filter.filter(_headers)
-
-        return _headers
-
-    def _add_filter(self, strategy: FilterStrategy):
-        self.filters.append(strategy)
-
-
 class TeamSizeFilter(FilterStrategy):
     def __init__(self, size):
         self.size = size

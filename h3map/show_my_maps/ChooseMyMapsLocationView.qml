@@ -7,11 +7,18 @@ import QtQuick.Dialogs 1.0
 Item {
     id: libraryEmpty
     anchors.fill: parent
+    anchors.margins: Qt.AlignCenter
 
     signal libraryPathChosen(string path)
 
     ColumnLayout {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
         Layout.alignment: Qt.AlignCenter
+
+        Text {
+            text: "Frohe Weihnachten du Nette!🎄🎁\nSodass wir noch viele tolle Spieleabende miteinander verbringen ♥"
+        }
 
         Button {
             Layout.alignment: Qt.AlignCenter

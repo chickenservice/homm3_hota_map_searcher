@@ -43,7 +43,6 @@ Item {
 
     function updateFilter(summary) {
         var toFilter = summary["filtered"]
-        filtered.items.removeGroups(0, filtered.items.count, "filtered")
         for(var i = 0; i < toFilter.length; i++) {
             filtered.items.addGroups(toFilter[i], 1, "filtered")
         }
@@ -62,7 +61,11 @@ Item {
         }
 
         function onImportedMaps() {
-            //filters.apply()
+            filters.apply()
+        }
+
+        function onApplying() {
+            filtered.items.removeGroups(0, filtered.items.count, "filtered")
         }
 
         function onApplied(toFilter) {

@@ -39,6 +39,10 @@ GridView {
         NumberAnimation { properties: "scale"; from: 0; to: 1.0; duration: 400 }
         NumberAnimation { properties: "opacity"; from: 0; to: 1.0; duration: 400 }
     }
+
+    remove: Transition {
+        NumberAnimation { properties: "opacity"; from: 1.0; to: 0.5; duration: 20 }
+    }
 }
 
 /*##^##

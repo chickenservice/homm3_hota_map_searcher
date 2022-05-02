@@ -3,6 +3,8 @@ import sys
 import cli_ui
 import click
 
+import rc
+
 from h3map.show_my_maps.show_my_maps import ShowMyMapsView, ShowMyMaps
 
 

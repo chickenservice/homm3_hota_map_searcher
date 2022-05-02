@@ -1,6 +1,8 @@
 import QtQuick 2.0
 import QtQuick.Layouts 1.3
 
+import "../../"
+
 ColumnLayout {
     Layout.fillHeight: true
     Layout.preferredWidth: parent.width
@@ -14,12 +16,5 @@ ColumnLayout {
         text: model.description
         maximumLineCount: 15
         wrapMode: Text.Wrap
-    }
-
-    Text {
-        id: lastPlayed
-
-        text: qsTr("Last played: Never")
-        color: 'grey'
     }
 }

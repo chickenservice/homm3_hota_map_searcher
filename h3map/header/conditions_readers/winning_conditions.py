@@ -12,8 +12,8 @@ class WinningConditionReader(ABC):
         self.ai_can_reach_it = 1
 
     def read(self):
-        self.allow_standard_win = self.parser.uint8()
-        self.ai_can_reach_it = self.parser.uint8()
+        self.allow_standard_win = self.parser.bool()
+        self.ai_can_reach_it = self.parser.bool()
 
 
 class StandardWinningConditionReader(WinningConditionReader):
@@ -28,9 +28,11 @@ class AcquireSpecificArtifactReader(WinningConditionReader):
     def __init__(self, parser):
         super().__init__(parser)
 
-    def read(self):
+    def read(self, skip=0):
         super().read()
         artifact_code = self.parser.uint8()
+        if skip > 0:
+            self.parser.skip(skip)
         return AcquireSpecificArtifact(self.allow_standard_win, self.ai_can_reach_it, artifact_code)
 
 
@@ -38,9 +40,11 @@ class AccumulateCreaturesReader(WinningConditionReader):
     def __init__(self, parser):
         super().__init__(parser)
 
-    def read(self):
+    def read(self, skip=0):
         super().read()
-        unit_code = self.parser.uint16()
+        unit_code = self.parser.uint8()
+        if skip > 0:
+            self.parser.skip(skip)
         amount = self.parser.uint32()
         return AccumulateCreatures(self.allow_standard_win, self.ai_can_reach_it, unit_code, amount)
 

@@ -29,5 +29,7 @@
         <file>header/MapSummaryView/MapDetails.qml</file>
         <file>header/MapSummaryView/MapSummaryView.qml</file>
         <file>filtering/FilterBarMock.qml</file>
+        <file>Theme.qml</file>
+        <file>qmldir</file>
     </qresource>
 </RCC>

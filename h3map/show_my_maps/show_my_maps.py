@@ -9,13 +9,14 @@ from typing import Protocol, List, Union
 from PySide2.QtCore import Slot, QThreadPool, QObject, Signal, QSize, QUrl, Property
 from PySide2.QtQuick import QQuickView
 from PySide2.QtWidgets import QApplication
+from sqlalchemy import or_, func, and_, distinct
 from sqlalchemy.orm import sessionmaker
 
 from h3map.asyncFunc import AsyncFunc
 from h3map.filtering.filter import Filter, AndFilter, MapSizeFilter, TeamSizeFilter, TeamPlayerNumberFilter
 from h3map.header.map_reader import MapReader
 from h3map.header.models import Header, Metadata, TeamSetup, Description, StandardWinningCondition, \
-    StandardLossCondition
+    StandardLossCondition, MapProperties
 from h3map.heroes3 import Player, engine, PlayerColor, Town, Map, MapSize, Version, Difficulty, WinningCondition, \
     LossCondition, Team, Config
 
@@ -79,6 +80,7 @@ class ShowMyMapsView(QObject):
     importedMaps = Signal()
     configuredChanged = Signal()
 
+    applying = Signal()
     applied = Signal('QVariantMap')
     cleared = Signal()
 
@@ -92,7 +94,7 @@ class ShowMyMapsView(QObject):
     def maps(self):
         if self.my_maps and self.mapsDirectoryConfigured:
             def _async():
-                #self.my_maps.import_new_maps()
+                # self.my_maps.import_new_maps()
                 self.my_maps.load()
 
             self.threadpool.start(AsyncFunc(_async))
@@ -108,7 +110,7 @@ class ShowMyMapsView(QObject):
         view.setMinimumSize(QSize(1200, 800))
 
         qml_file = Path(__file__).parent.parent / "main.qml"
-        view.setSource(QUrl.fromLocalFile(str(qml_file)))
+        view.setSource(QUrl('qrc:/main.qml'))
         view.show()
 
         sys.exit(app.exec_())
@@ -146,39 +148,29 @@ class ShowMyMapsView(QObject):
 
     @Slot('QVariantMap')
     def apply(self, filterForm):
-        mapSizeFilter = FilterFormSelectionBuilder()
-        teamSizeFilter = FilterFormSelectionBuilder()
-        playerFilter = FilterFormSelectionBuilder()
+        self.applying.emit()
+        def _func():
+            mapSize = filterForm["mapSizeOptions"]
+            sizes = []
+            for option in mapSize:
+                if mapSize[option]["selected"]:
+                    sizes.append(mapSize[option]["value"])
 
-        mapSize = filterForm["mapSizeOptions"]
-        mapSizeFilter.addFilter(MapSizeFilter, mapSize["XL"])
-        mapSizeFilter.addFilter(MapSizeFilter, mapSize["L"])
-        mapSizeFilter.addFilter(MapSizeFilter, mapSize["M"])
-        mapSizeFilter.addFilter(MapSizeFilter, mapSize["S"])
+            teamSize = filterForm["teamSizeOptions"]
+            teamSizes = []
+            for option in teamSize:
+                if teamSize[option]["selected"]:
+                    teamSizes.append(teamSize[option]["value"])
 
-        teamSize = filterForm["teamSizeOptions"]
-        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["0"])
-        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["1"])
-        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["2"])
-        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["3"])
-        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["4"])
-        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["5"])
-        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["6"])
-        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["7"])
-        teamSizeFilter.addFilter(TeamSizeFilter, teamSize["8"])
+            playerNumber = filterForm["playerNumberOptions"]
+            playerNumbers = []
+            for option in playerNumber:
+                if playerNumber[option]["selected"]:
+                    playerNumbers.append(playerNumber[option]["value"])
 
-        playerNumber = filterForm["playerNumberOptions"]
-        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["0"])
-        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["1"])
-        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["2"])
-        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["3"])
-        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["4"])
-        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["5"])
-        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["6"])
-        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["7"])
-        playerFilter.addFilter(TeamPlayerNumberFilter, playerNumber["8"])
+            self.my_maps.filter_summary(playerNumbers, teamSizes, sizes)
 
-        self.my_maps.filter_summary(playerFilter.build(), teamSizeFilter.build(), mapSizeFilter.build())
+        self.threadpool.start(AsyncFunc(_func))
 
     @Slot()
     def clear(self):
@@ -286,6 +278,7 @@ class MyMapsInDirectory:
             return header
         except Exception as e:
             print("Sorry map couldn't be loaded for " + path + " due to an error: ", e)
+            return None
 
 
 class MyMapsInMemory:
@@ -390,8 +383,9 @@ class MyMapsSqlite:
         players = []
         with self._session() as session, session.begin():
             for player in header.players_info:
-                color = session.query(PlayerColor).where(PlayerColor.id == player.id+1).first()
-                team = session.query(Team).where(Team.id == header.teams.teams[player.id]).first() if header.teams.number_of_teams > 1 else None
+                color = session.query(PlayerColor).where(PlayerColor.id == player.id + 1).first()
+                team = session.query(Team).where(
+                    Team.id == header.teams.teams[player.id] + 1).first()
                 towns = session.query(Town).filter(Town.name.in_(player.faction_info.factions)).all()
                 p = Player(player_color=color, team=team, towns=towns)
                 players.append(p)
@@ -400,7 +394,8 @@ class MyMapsSqlite:
                        description=header.metadata.description.summary,
                        any_players=header.metadata.properties.any_players,
                        version=session.query(Version).where(Version.version == header.metadata.version.version).first(),
-                       difficulty=session.query(Difficulty).where(Difficulty.difficulty == header.metadata.difficulty.difficulty).first(),
+                       difficulty=session.query(Difficulty).where(
+                           Difficulty.difficulty == header.metadata.difficulty.difficulty).first(),
                        map_size=session.query(MapSize).where(MapSize.size == header.metadata.properties.size).first(),
                        players=players,
                        )
@@ -411,16 +406,20 @@ class MyMapsSqlite:
             maps = session.query(Map).all()
             ms = []
             for m in maps:
-                ms.append(self._to_dict(m))
+                teams = session.query(Map.id).outerjoin(Map.players).where(Map.id == m.id).group_by(Map.id).having(func.count(distinct(Player.team_id))).count()
+                ms.append(self._to_dict(m, teams=teams))
             return ms
 
-    def _to_dict(self, m: Map):
+    def _to_dict(self, m: Map, teams=0):
         header_dict = {}
         header_dict["idx"] = m.id
         header_dict["name"] = m.name
         header_dict["description"] = m.description
-        header_dict["humans"] = 0
-        header_dict["teams"] = 0
+        header_dict["players"] = len(m.players) if m.players else 0
+        header_dict["humans"] = '-'
+        header_dict["teams"] = teams
+        header_dict["size"] = m.map_size.name
+        header_dict["difficulty"] = m.difficulty.name
         header_dict["thumbnail"] = "default.gif"
 
         return header_dict
@@ -433,39 +432,77 @@ class ShowMyMaps:
         self._cache = MyMapsInMemory()
         self._display = display
 
-    def filter_summary(self, number_of_players: Filter = None, team_size: Filter = None, map_size: Filter = None):
+    def _filter(self, vals, entity):
+        _vals = []
+        for val in vals:
+            _vals.append(func.count(entity) == val)
+
+        return _vals
+
+    def _filter2(self, vals, entity):
+        _vals = []
+        for val in vals:
+            _vals.append(func.count(distinct(entity)) == val)
+
+        return _vals
+
+    def filter_summary(self, number_of_players=None, team_size=None, map_size=None):
         map_filter: MyMapsFilter = self._cache
 
         f = AndFilter()
         f.add(number_of_players)
         f.add(team_size)
         f.add(map_size)
+        _session = sessionmaker(bind=engine)
+        with _session() as session, session.begin():
+            nums = self._filter(number_of_players, Player.id)
+            nums_team = self._filter2(team_size, Player.team_id)
+            sizes = [Map.map_size == session.query(MapSize).filter(MapSize.name == s).first() for s in map_size]
+            maps = session.query(Map.id)\
+                .filter(and_(or_(*sizes)))\
+                .outerjoin(Map.players) \
+                .join(Player.team)\
+                .group_by(Map.id) \
+                .having(and_(or_(*nums), or_(*nums_team)))\
+                .all()
 
-        filtered = map_filter.filter(f)
-        summary = {"mapSize": {}, "playerNumber": {}, "teamSize": {}}
+            summary = {"mapSize": {}, "playerNumber": {}, "teamSize": {}}
+            summary["filtered"] = [m.id - 1 for m in maps]
 
-        for option in MapSizeFilter.sizes():
-            total = AndFilter()
-            total.add(MapSizeFilter(option))
-            total.add(number_of_players)
-            total.add(team_size)
-            summary["mapSize"][option] = len(map_filter.filter(total))
+            for option in MapSizeFilter.sizes():
+                s = session.query(MapSize).where(MapSize.name == option).first()
+                c = session.query(Map.id) \
+                    .filter(Map.map_size == s) \
+                    .outerjoin(Map.players) \
+                    .join(Player.team) \
+                    .group_by(Map.id) \
+                    .having(and_(or_(*nums), or_(*nums_team))) \
+                    .count()
 
-        for option in range(0, 8):
-            total = AndFilter()
-            total.add(TeamSizeFilter(option))
-            total.add(number_of_players)
-            total.add(map_size)
-            summary["teamSize"][str(option)] = len(map_filter.filter(total))
+                summary["mapSize"][option] = c
 
-        for option in range(0, 8):
-            total = AndFilter()
-            total.add(TeamPlayerNumberFilter(option))
-            total.add(team_size)
-            total.add(map_size)
-            summary["playerNumber"][str(option)] = len(map_filter.filter(total))
+            for option in range(2, 9):
+                c = session.query(Map.id) \
+                    .filter(and_(or_(*sizes))) \
+                    .outerjoin(Map.players) \
+                    .join(Player.team) \
+                    .group_by(Map.id) \
+                    .having(and_(or_(*nums), func.count(distinct(Player.team_id)) == option)) \
+                    .count()
+                summary["teamSize"][str(option)] = c
+                
+            for option in range(1, 9):
+                p = func.count(Player.id) == option
+                c = session.query(Map.id) \
+                    .filter(and_(or_(*sizes))) \
+                    .outerjoin(Map.players) \
+                    .join(Player.team) \
+                    .group_by(Map.id) \
+                    .having(and_(p, or_(*nums_team))) \
+                    .count()
 
-        summary["filtered"] = [idx for idx, _ in filtered]
+                summary["playerNumber"][str(option)] = c
+                
         self._display.show_filtered_maps(summary)
 
     def import_maps(self, location: str):
@@ -479,6 +516,8 @@ class ShowMyMaps:
         display.show_my_maps_view()
         display.show_amount_of_maps_to_import(my_location.count())
         for map_ in self._maps.all():
+            if map_ is None:
+                continue
             store.add(map_)
             cache.add(map_)
             display.show_map_overview(_toDict(map_))

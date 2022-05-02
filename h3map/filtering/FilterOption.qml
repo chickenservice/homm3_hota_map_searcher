@@ -1,11 +1,15 @@
 import QtQuick 2.0
 
+import ".."
+
 Item {
     required property ListModel filterOptions
 
     required property string name
 
     property string color: "#dddddd"
+
+    property color activeFilter: Theme.primary
 
     property string activeOptions: name
 
@@ -26,7 +30,7 @@ Item {
     function toggleActive() {
         let active = getActiveOptions()
         if(active.length > name.length) {
-            color = "#111111"
+            color = activeFilter
             activeOptions = active
         }
         else {

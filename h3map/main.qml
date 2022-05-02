@@ -46,12 +46,13 @@ Rectangle {
             TabButton{
                 text: qsTr("Library")
             }
+            /*
             TabButton{
                 text: qsTr("Discover")
             }
             TabButton{
                 text: qsTr("Settings")
-            }
+            }*/
         }
 
         RowLayout {

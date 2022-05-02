@@ -188,6 +188,7 @@ def upgrade():
             {"name": "Team 5"},
             {"name": "Team 6"},
             {"name": "Team 7"},
+            {"name": "Team 8"},
         ]
     )
 

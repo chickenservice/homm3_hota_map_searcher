@@ -1,10 +1,16 @@
+import os
 from pathlib import Path
 
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, Table, UniqueConstraint, \
     CheckConstraint, MetaData
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
-engine = create_engine('sqlite:///' + str(Path.home()) + '/Projects/Homm3_Hota_Map_Searcher/.cache/h3map.db')
+if not Path.exists(Path.home() / ".h3map"):
+    os.mkdir(Path.home() / ".h3map")
+    with open(Path.home() / ".h3map/h3map.db", "w") as f:
+        pass
+
+engine = create_engine('sqlite:///' + str(Path.home()) + '/.h3map/h3map.db')
 
 convention = {
     "ix": 'ix_%(column_0_label)s',
