@@ -390,6 +390,9 @@ class MyMapsSqlite:
                 p = Player(player_color=color, team=team, towns=towns)
                 players.append(p)
 
+            loss_cond = session.query(LossCondition).where(LossCondition.id == header.loss_condition + 1).first()
+            win_cond = session.query(WinningCondition).where(WinningCondition.id == header.winning_condition + 1).first()
+
             map_ = Map(name=header.metadata.description.name,
                        description=header.metadata.description.summary,
                        any_players=header.metadata.properties.any_players,
@@ -398,6 +401,8 @@ class MyMapsSqlite:
                            Difficulty.difficulty == header.metadata.difficulty.difficulty).first(),
                        map_size=session.query(MapSize).where(MapSize.size == header.metadata.properties.size).first(),
                        players=players,
+                       winning_condition=win_cond,
+                       loss_condition=loss_cond,
                        )
             session.add(map_)
 
@@ -425,6 +430,8 @@ class MyMapsSqlite:
         header_dict["size"] = m.map_size.name
         header_dict["difficulty"] = m.difficulty.name
         header_dict["thumbnail"] = "default.gif"
+        header_dict["win_cond"] = m.winning_condition.name if m.winning_condition else ""
+        header_dict["loss_cond"] = m.loss_condition.name if m.loss_condition else ""
 
         return header_dict
 

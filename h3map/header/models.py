@@ -135,9 +135,10 @@ class LossCondition(Condition):
     pass
 
 
-@dataclass()
+@dataclass
 class StandardLossCondition(LossCondition):
     number: int
+    id: int = 0
 
     def __repr__(self):
         return "Standard loss condition"
@@ -148,6 +149,7 @@ class LoseSpecificTown(LossCondition):
     x: int
     y: int
     z: int
+    id: int = 1
 
     def __repr__(self):
         return "Lose a specific town"
@@ -158,14 +160,16 @@ class LoseSpecificHero(LossCondition):
     x: int
     y: int
     z: int
+    id: int = 2
 
     def __repr__(self):
         return "Lose a specific hero"
 
 
-@dataclass()
+@dataclass
 class TimeExpires(LossCondition):
     days: int
+    id: int = 3
 
     def __repr__(self):
         return "Lose on time"
@@ -179,6 +183,8 @@ class WinningCondition(Condition):
 
 @dataclass
 class StandardWinningCondition(WinningCondition):
+    id: int = 0
+
     def __repr__(self):
         return "Standard winning condition"
 
@@ -186,6 +192,7 @@ class StandardWinningCondition(WinningCondition):
 @dataclass
 class AcquireSpecificArtifact(WinningCondition):
     artifact_code: bool
+    id: int = 1
 
     def __repr__(self):
         return "Acquire a specific artifact"
@@ -195,6 +202,7 @@ class AcquireSpecificArtifact(WinningCondition):
 class AccumulateCreatures(WinningCondition):
     unit_code: int
     amount: int
+    id: int = 2
 
     def __repr__(self):
         return "Accumulate creatures"
@@ -204,6 +212,7 @@ class AccumulateCreatures(WinningCondition):
 class AccumulateResources(WinningCondition):
     resource_code: int
     amount: int
+    id: int = 3
 
     def __repr__(self):
         return "Accumulate resources"
@@ -216,6 +225,7 @@ class UpgradeSpecificTown(WinningCondition):
     z: int
     hall_level: int
     castle_level: int
+    id: int = 4
 
     def __repr__(self):
         return "Upgrade a specific town"
@@ -226,6 +236,7 @@ class BuildGrailStructure(WinningCondition):
     x: int
     y: int
     z: int
+    id: int = 5
 
     def __repr__(self):
         return "Build the grail structure"
@@ -236,6 +247,7 @@ class DefeatSpecificHero(WinningCondition):
     x: int
     y: int
     z: int
+    id: int = 6
 
     def __repr__(self):
         return "Defeat specific hero"
@@ -246,6 +258,7 @@ class CaptureSpecificTown(WinningCondition):
     x: int
     y: int
     z: int
+    id: int = 7
 
     def __repr__(self):
         return "Capture a specific town"
@@ -256,6 +269,7 @@ class DefeatSpecificMonster(WinningCondition):
     x: int
     y: int
     z: int
+    id: int = 8
 
     def __repr__(self):
         return "Defeat specific monster"
@@ -263,12 +277,16 @@ class DefeatSpecificMonster(WinningCondition):
 
 @dataclass
 class FlagAllCreatures(WinningCondition):
+    id: int = 9
+
     def __repr__(self):
         return "Flag all creature dwellings"
 
 
 @dataclass
 class FlagAllMines(WinningCondition):
+    id: int = 10
+
     def __repr__(self):
         return "Flag all mines"
 
@@ -279,6 +297,7 @@ class TransportSpecificArtifact(WinningCondition):
     x: int
     y: int
     z: int
+    id: int = 11
 
     def __repr__(self):
         return "Transport a specific item"
@@ -296,6 +315,13 @@ class Header(ABC):
     def humans(self):
         return len([player for player in self.players_info if player.who_can_play.can_human_play])
 
+    @property
+    def winning_condition(self):
+        return self.conditions[0].id
+
+    @property
+    def loss_condition(self):
+        return self.conditions[1].id
 
     def __repr__(self):
         string = "{0}\n".format(self.metadata)

@@ -43,6 +43,16 @@ Row {
                 font.italic: true
             }
 
+            Text {
+                text: "Winning condition: " + model.win_cond
+                font.italic: true
+            }
+
+            Text {
+                text: "Loss condition: " + model.loss_cond
+                font.italic: true
+            }
+
             }
         Column {
 
