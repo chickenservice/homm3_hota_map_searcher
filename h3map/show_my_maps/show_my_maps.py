@@ -387,7 +387,7 @@ class MyMapsSqlite:
                 team = session.query(Team).where(
                     Team.id == header.teams.teams[player.id] + 1).first()
                 towns = session.query(Town).filter(Town.name.in_(player.faction_info.factions)).all()
-                p = Player(player_color=color, team=team, towns=towns)
+                p = Player(player_color=color, team=team, towns=towns, can_computer_play=player.who_can_play.can_computer_play, can_human_play=player.who_can_play.can_human_play)
                 players.append(p)
 
             loss_cond = session.query(LossCondition).where(LossCondition.id == header.loss_condition + 1).first()
@@ -416,16 +416,20 @@ class MyMapsSqlite:
                     .distinct(Player.team_id) \
                     .group_by(Player.team_id) \
                     .count()
-                ms.append(self._to_dict(m, teams=teams))
+                humans = session.query(Player.id)\
+                    .filter(Player.map_id == m.id)\
+                    .filter(Player.can_human_play)\
+                    .count()
+                ms.append(self._to_dict(m, teams=teams, humans=humans))
             return ms
 
-    def _to_dict(self, m: Map, teams=0):
+    def _to_dict(self, m: Map, teams=0, humans=0):
         header_dict = {}
         header_dict["idx"] = m.id
         header_dict["name"] = m.name
         header_dict["description"] = m.description
         header_dict["players"] = len(m.players) if m.players else 0
-        header_dict["humans"] = '-'
+        header_dict["humans"] = humans
         header_dict["teams"] = teams
         header_dict["size"] = m.map_size.name
         header_dict["difficulty"] = m.difficulty.name

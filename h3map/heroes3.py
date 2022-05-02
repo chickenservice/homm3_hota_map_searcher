@@ -70,6 +70,8 @@ class Player(Base):
     __tablename__ = 'player'
 
     id = Column(Integer, primary_key=True)
+    can_computer_play = Column(Boolean)
+    can_human_play = Column(Boolean)
 
     map_id = Column(Integer, ForeignKey("map.id"))
 

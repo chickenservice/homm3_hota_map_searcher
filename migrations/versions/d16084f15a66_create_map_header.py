@@ -45,6 +45,8 @@ def upgrade():
     op.create_table(
         'player',
         sa.Column('id', sa.Integer, primary_key=True),
+        sa.Column('can_computer_play', sa.Boolean),
+        sa.Column('can_human_play', sa.Boolean),
         sa.Column('map_id', sa.Integer),
         sa.Column('player_color_id', sa.Integer),
         sa.Column('team_id', sa.Integer),
