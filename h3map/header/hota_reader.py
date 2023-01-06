@@ -42,5 +42,6 @@ towns = ["castle",
          "dungeon",
          "stronghold",
          "fortress",
-         "conflux"
+         "conflux",
+         "cove",
          "neutral"]

@@ -1,3 +1,14 @@
+towns = ["castle",
+         "rampart",
+         "tower",
+         "necropolis",
+         "inferno",
+         "dungeon",
+         "stronghold",
+         "fortress",
+         "conflux",
+         "neutral"]
+
 # TODO: Define all heroes
 heroes = [
     "adela",
