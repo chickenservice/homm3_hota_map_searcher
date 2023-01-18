@@ -1,14 +1,12 @@
+from h3map.heroes3map.map_picklers.shared import players
 from h3map.heroes3map.map_picklers.win_loss_conditions import tag_cond, standard_win, \
     acquire_specific_artifact, accumulate_creatures, accumulate_resources, upgrade_specific_town, build_grail_structure, \
     defeat_specific_hero, capture_specific_town, defeat_specific_monster, flag_all_creatures, flag_all_mines, \
     transport_specific_artifact, standard_loss, lose_specific_town, lose_specific_hero, time_expires
-from h3map.heroes3map.models import Header, PlayerInfo, AiType, FactionInfo, TownInfo, Hero, Metadata, TeamSetup, \
-    CustomHeroInfo, HotaMetadataV2, HotaMetadataV1
-from h3map.heroes3map.pypickler.picklers import Uint16, Bool
 from h3map.heroes3map.pypickler.combinators import Uint32, Uint8, FixedList, \
-    ArgWrap, kwrap, wrap, maybe, if_then, list_pp, string, Sequ, altp, Lift
-from h3map.heroes3map.transformations import _get_allowed_factions, _get_allowed_heroes
-from h3map.heroes3map.winning_conditions import EliminateAllMonsters, SurviveForCertainTime
+    kwrap, wrap, string, Sequ, altp, Lift
+from h3map.heroes3map.pypickler.picklers import Bool
+from h3map.heroes3map.transformations import _get_allowed_heroes
 
 eliminate_all_monster = kwrap(
     dict,
@@ -59,50 +57,7 @@ horn_of_the_abyss = kwrap(
         difficulty=Uint8,
         max_hero_level=Uint8,
     ),
-    player_infos=FixedList(
-        kwrap(
-            dict,
-            can_human_play=Bool,
-            can_computer_play=Bool,
-            ai_type=kwrap(
-                dict,
-                ai_type=Bool,
-                aggressiveness=Bool,
-            ),
-            faction_info=kwrap(
-                dict,
-                factions=wrap(
-                    _get_allowed_factions,
-                    _get_allowed_factions,
-                    Uint16,
-                ),
-                is_faction_random=Bool,
-            ),
-            town_info=maybe(
-                kwrap(
-                    dict,
-                    a=Bool,
-                    b=Bool,
-                    x=Uint8,
-                    y=Uint8,
-                    z=Uint8,
-                )
-            ),
-            hero_properties=kwrap(
-                dict,
-                has_random_hero=Bool,
-                custom=if_then(
-                    lambda hid: True if hid != 255 else False,
-                    kwrap(
-                        dict,
-                        customid=Uint8,
-                        name=string()
-                    )
-                ),
-            ),
-            heroes=list_pp(
-                wrap(lambda x: x[1], lambda x: (0, x, 0, 0), ArgWrap(Uint8, Uint8, Uint16, Uint8)),
-                kwrap(dict, id=Uint8, name=string()))), 8),
+    player_infos=players,
     winning_condition=altp(tag_cond, tag_cond, [
         standard_win,
         acquire_specific_artifact,

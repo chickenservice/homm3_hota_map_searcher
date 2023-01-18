@@ -1,15 +1,12 @@
-from h3map.header.models import AcquireSpecificArtifact, AccumulateCreatures
+from h3map.heroes3map.map_picklers.picklers import hero
 from h3map.heroes3map.map_picklers.win_loss_conditions import tag_cond, \
     transport_specific_artifact, flag_all_mines, flag_all_creatures, defeat_specific_monster, capture_specific_town, \
     defeat_specific_hero, build_grail_structure, upgrade_specific_town, accumulate_resources, \
     standard_win, standard_loss, lose_specific_town, lose_specific_hero, time_expires
-from h3map.heroes3map.models import Header, PlayerInfo, AiType, FactionInfo, TownInfo, Hero, Metadata, TeamSetup, \
-    CustomHeroInfo
-from h3map.heroes3map.pypickler.picklers import Bool
 from h3map.heroes3map.pypickler.combinators import Uint32, Uint8, FixedList, \
-    kwrap, wrap, maybe, if_then, string, altp, Lift
+    kwrap, wrap, maybe, string, altp, Lift
+from h3map.heroes3map.pypickler.picklers import Bool
 from h3map.heroes3map.transformations import _get_allowed_factions, _get_allowed_heroes
-
 
 acquire_specific_artifact = kwrap(
     dict,
@@ -65,19 +62,7 @@ restoration_of_erathia = kwrap(
                     z=Uint8,
                 )
             ),
-            hero_properties=kwrap(
-                dict,
-                has_random_hero=Bool,
-                custom=if_then(
-                    lambda hid: True if hid != 255 else False,
-                    kwrap(
-                        dict,
-                        customid=Uint8,
-                        name=string()
-                    )
-                ),
-            )
-        ), 8),
+            hero_properties=hero), 8),
     winning_condition=altp(tag_cond, tag_cond, [
         standard_win,
         acquire_specific_artifact,

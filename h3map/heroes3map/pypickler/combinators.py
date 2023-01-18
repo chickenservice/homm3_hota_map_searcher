@@ -59,6 +59,18 @@ class FixedList:
         return [self._pa.unpickle(state)[0] for _ in range(0, self._n)], state
 
 
+def ksequ(t, pa, kpb):
+    return Sequ(
+        lambda _: _,
+        pa,
+        lambda a: wrap(
+            lambda b: t(**a, **b),
+            lambda b: b,
+            kpb(a)
+        )
+    )
+
+
 def alt(tag, ps):
     return Sequ(tag, zero_to(len(ps)), lambda i: ps[i])
 
@@ -79,20 +91,12 @@ def zero_to(n):
     return Uint8 if n <= 256 else Uint32
 
 
-def if_then(sel, pa):
-    return altp(lambda b: 1 if b else 0, sel, [Lift(None), wrap(ident, ident, pa)])
-
-
 def maybe(pa):
     return alt(lambda b: 1 if b else 0, [Lift(None), wrap(ident, ident, pa)])
 
 
 def list_p(pa):
     return Sequ(len, Uint32, lambda n: FixedList(pa, n))
-
-
-def list_pp(pn, pa):
-    return Sequ(len, pn, lambda n: FixedList(pa, n))
 
 
 def string():
