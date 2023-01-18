@@ -1,8 +1,8 @@
 from h3map.heroes3map.models import Header, PlayerInfo, AiType, FactionInfo, TownInfo, Hero, Metadata, TeamSetup, \
-    HeroInfo, CustomHeroInfo
-from h3map.heroes3map.schema.to_remove_pypickler import KWrap, Bool, Uint32, String, Uint8, FixedList, Wrap, Uint16, Maybe, Alt, \
-    Uchar, Lift, List, PList, Tuple, IfThen, AltP
-from h3map.heroes3map.schema.transformations import _get_allowed_factions, _get_allowed_heroes
+    CustomHeroInfo
+from h3map.heroes3map._old.schema.to_remove_pypickler import KWrap, Bool, Uint32, String, Uint8, FixedList, Wrap, Uint16, Maybe, \
+    Uchar, Lift, PList, Tuple, IfThen, AltP
+from h3map.heroes3map._old.schema.transformations import _get_allowed_factions, _get_allowed_heroes
 from h3map.heroes3map.loss_conditions import StandardLossCondition, LoseSpecificTown, LoseSpecificHero, TimeExpires
 from h3map.heroes3map.winning_conditions import StandardWinningCondition, AcquireSpecificArtifact, AccumulateCreatures, \
     AccumulateResources, UpgradeSpecificTown, BuildGrailStructure, DefeatSpecificHero, CaptureSpecificTown, \

@@ -1,11 +1,23 @@
 from h3map.header.constants import heroes
-from h3map.heroes3map.header.header_reader import Header, Metadata, PlayerInfo, Teams, AllowedHeroes, PlayerInfos, \
-    AiTactic, FactionInfo, TownInfo, HeroProperties, HeroesBelongingToPlayers
-from h3map.heroes3map.header.loss_conditions import LossConditionReader
-from h3map.heroes3map.header.winning_conditions import WinningConditionReader
+from h3map.heroes3map._old.header.header_reader import Header, Metadata, PlayerInfo, Teams, AllowedHeroes, PlayerInfos, \
+    FactionInfo, TownInfo, HeroProperties, HeroesBelongingToPlayers
+from h3map.heroes3map._old.header.loss_conditions import LossConditionReader
+from h3map.heroes3map._old.header.winning_conditions import WinningConditionReader
 
 
-class WakeOfGods:
+class AiTactic:
+    def __init__(self, stream):
+        self.ai_tactic = None
+        self.parser = stream
+
+    def read(self):
+        self.ai_tactic = self.parser.uint8()
+
+    def __repr__(self):
+        return f"{self.ai_tactic}"
+
+
+class ArmageddonsBlade:
     def __init__(self, stream):
         self._stream = stream
         self._read()
@@ -16,6 +28,7 @@ class WakeOfGods:
             player_infos=PlayerInfos(
                 player_info=[PlayerInfo(
                     self._stream, i,
+                    skip=12,
                     ai_tactic=AiTactic(self._stream),
                     faction_info=FactionInfo(self._stream, towns=towns),
                     town_info=TownInfo(self._stream),
@@ -31,7 +44,7 @@ class WakeOfGods:
         self.header.read()
 
     def __repr__(self):
-        return f"Wake of Gods\n\n{self.header}"
+        return f"Armageddon's Blade\n\n{self.header}"
 
 
 towns = ["castle",

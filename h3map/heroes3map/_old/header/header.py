@@ -1,7 +1,7 @@
 import chardet
 
-from h3map.heroes3map.header.loss_conditions import LossConditionReader
-from h3map.heroes3map.header.winning_conditions import WinningConditionReader
+from h3map.heroes3map._old.header.loss_conditions import LossConditionReader
+from h3map.heroes3map._old.header.winning_conditions import WinningConditionReader
 
 
 def _decode(string):

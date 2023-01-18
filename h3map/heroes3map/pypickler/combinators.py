@@ -72,7 +72,7 @@ def wrap(i, j, pa):
 
 
 def kwrap(t, **kwpa):
-    return wrap(lambda kw: kw, lambda v: tuple(getattr(v, k) for k in kwpa.keys()), ArgWrap(*kwpa.values()))
+    return wrap(lambda kw: t(**dict(zip(kwpa, kw))), lambda v: tuple(getattr(v, k) for k in kwpa.keys()), ArgWrap(*kwpa.values()))
 
 
 def zero_to(n):

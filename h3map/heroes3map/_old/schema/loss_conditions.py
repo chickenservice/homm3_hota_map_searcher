@@ -1,5 +1,5 @@
 from h3map.heroes3map.loss_conditions import StandardLossCondition, LoseSpecificTown, LoseSpecificHero, TimeExpires
-from h3map.heroes3map.schema.schema import Schema, Uint8, Uint16
+from h3map.heroes3map._old.schema.schema import Schema, Uint8, Uint16
 
 
 class LossCondition(Schema):

@@ -17,27 +17,31 @@ loss_cond = altp(tag_cond, tag_cond,
 standard_loss = Lift(StandardLossCondition)
 
 lose_specific_town = kwrap(
-    LoseSpecificTown,
+    dict,
+    name=Lift("Lose specific town"),
     x=Uint8,
     y=Uint8,
     z=Uint8,
 )
 
 lose_specific_hero = kwrap(
-    LoseSpecificHero,
+    dict,
+    name=Lift("Lose specific hero"),
     x=Uint8,
     y=Uint8,
     z=Uint8,
 )
 
 time_expires = kwrap(
-    TimeExpires,
+    dict,
+    name=Lift("Time expires"),
     days=Uint16)
 
 standard_win = Lift(StandardWinningCondition)
 
 acquire_specific_artifact = kwrap(
-    AcquireSpecificArtifact,
+    dict,
+    name=Lift("Acquire specific artifact"),
     allow_standard_win=Bool,
     ai_can_reach_it=Bool,
     artifact_code=Uint8,
@@ -45,7 +49,8 @@ acquire_specific_artifact = kwrap(
 )
 
 accumulate_creatures = kwrap(
-    AccumulateCreatures,
+    dict,
+    name=Lift("Accumulate creatures"),
     allow_standard_win=Bool,
     ai_can_reach_it=Bool,
     unit_code=Uint8,
@@ -54,7 +59,8 @@ accumulate_creatures = kwrap(
 )
 
 accumulate_resources = kwrap(
-    AccumulateResources,
+    dict,
+    name=Lift("Accumulate resources"),
     allow_standard_win=Bool,
     ai_can_reach_it=Bool,
     resource_code=Uint8,
@@ -62,7 +68,8 @@ accumulate_resources = kwrap(
 )
 
 upgrade_specific_town = kwrap(
-    UpgradeSpecificTown,
+    dict,
+    name=Lift("Upgrade specific town"),
     allow_standard_win=Bool,
     ai_can_reach_it=Bool,
     x=Uint8,
@@ -73,7 +80,8 @@ upgrade_specific_town = kwrap(
 )
 
 build_grail_structure = kwrap(
-    BuildGrailStructure,
+    dict,
+    name=Lift("Build grail structure"),
     allow_standard_win=Bool,
     ai_can_reach_it=Bool,
     x=Uint8,
@@ -82,7 +90,8 @@ build_grail_structure = kwrap(
 )
 
 defeat_specific_hero = kwrap(
-    DefeatSpecificHero,
+    dict,
+    name=Lift("Defeat specific hero"),
     allow_standard_win=Bool,
     ai_can_reach_it=Bool,
     x=Uint8,
@@ -91,7 +100,8 @@ defeat_specific_hero = kwrap(
 )
 
 capture_specific_town = kwrap(
-    CaptureSpecificTown,
+    dict,
+    name=Lift("Capture specific town"),
     allow_standard_win=Bool,
     ai_can_reach_it=Bool,
     x=Uint8,
@@ -100,7 +110,8 @@ capture_specific_town = kwrap(
 )
 
 defeat_specific_monster = kwrap(
-    DefeatSpecificMonster,
+    dict,
+    name=Lift("Defeat specific monster"),
     allow_standard_win=Bool,
     ai_can_reach_it=Bool,
     x=Uint8,
@@ -109,19 +120,22 @@ defeat_specific_monster = kwrap(
 )
 
 flag_all_creatures = kwrap(
-    FlagAllCreatures,
+    dict,
+    name=Lift("Flag all creatures"),
     allow_standard_win=Bool,
     ai_can_reach_it=Bool,
 )
 
 flag_all_mines = kwrap(
-    FlagAllMines,
+    dict,
+    name=Lift("Flag all mines"),
     allow_standard_win=Bool,
     ai_can_reach_it=Bool,
 )
 
 transport_specific_artifact = kwrap(
-    TransportSpecificArtifact,
+    dict,
+    name=Lift("Transport specific artifact"),
     allow_standard_win=Bool,
     ai_can_reach_it=Bool,
     artifact_code=Uint8,

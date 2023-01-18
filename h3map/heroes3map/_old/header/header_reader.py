@@ -1,8 +1,5 @@
 import chardet
 
-from h3map.heroes3map.header.loss_conditions import LossConditionReader
-from h3map.heroes3map.header.winning_conditions import WinningConditionReader
-
 
 def _decode(string):
     encoding = chardet.detect(string)['encoding'] or 'utf-8'

@@ -1,5 +1,5 @@
 from h3map.heroes3map.models import Hero, HeroInfo
-from h3map.heroes3map.schema.schema import Schema
+from h3map.heroes3map._old.schema.schema import Schema
 
 
 class HeroPropertiesSchema(Schema):

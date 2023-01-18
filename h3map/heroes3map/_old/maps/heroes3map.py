@@ -1,8 +1,8 @@
-from h3map.heroes3map.maps.armageddons_blade import ArmageddonsBlade
-from h3map.heroes3map.maps.horn_of_the_abyss import HornOfTheAbyss
-from h3map.heroes3map.maps.restoration_of_erathia import RestorationOfErathia
-from h3map.heroes3map.maps.shadow_of_death import ShadowOfDeath
-from h3map.heroes3map.maps.wake_of_gods import WakeOfGods
+from h3map.heroes3map._old.maps.armageddons_blade import ArmageddonsBlade
+from h3map.heroes3map._old.maps.horn_of_the_abyss import HornOfTheAbyss
+from h3map.heroes3map._old.maps.restoration_of_erathia import RestorationOfErathia
+from h3map.heroes3map._old.maps.shadow_of_death import ShadowOfDeath
+from h3map.heroes3map._old.maps.wake_of_gods import WakeOfGods
 
 
 class Heroes3Map:

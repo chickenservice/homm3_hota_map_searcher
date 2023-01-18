@@ -1,7 +1,7 @@
 from h3map.heroes3map.winning_conditions import StandardWinningCondition, AcquireSpecificArtifact, AccumulateCreatures, \
     AccumulateResources, UpgradeSpecificTown, BuildGrailStructure, DefeatSpecificHero, CaptureSpecificTown, \
     DefeatSpecificMonster, FlagAllCreatures, FlagAllMines, TransportSpecificArtifact
-from h3map.heroes3map.schema.schema import Uint8, Schema, Uchar, Uint32, Bool
+from h3map.heroes3map._old.schema.schema import Uint8, Schema, Uchar, Uint32, Bool
 
 
 class WinningCondition(Schema):

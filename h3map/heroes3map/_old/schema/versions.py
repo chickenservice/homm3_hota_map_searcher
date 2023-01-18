@@ -1,5 +1,5 @@
-from h3map.heroes3map.schema.armageddons_blade import armageddons_blade
-from h3map.heroes3map.schema.schema import Uint32
+from h3map.heroes3map._old.schema.armageddons_blade import armageddons_blade
+from h3map.heroes3map._old.schema.schema import Uint32
 
 versions = {
 #    14: restoration_of_erathia,

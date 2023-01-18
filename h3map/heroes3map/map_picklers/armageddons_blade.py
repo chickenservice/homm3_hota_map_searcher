@@ -1,19 +1,21 @@
-from h3map.heroes3map.map_picklers.win_loss_conditions import winning_cond, loss_cond, tag_cond, standard_win, \
+from collections import OrderedDict
+
+from h3map.heroes3map.map_picklers.win_loss_conditions import tag_cond, standard_win, \
     acquire_specific_artifact, accumulate_creatures, accumulate_resources, upgrade_specific_town, build_grail_structure, \
     defeat_specific_hero, capture_specific_town, defeat_specific_monster, flag_all_creatures, flag_all_mines, \
     transport_specific_artifact, standard_loss, lose_specific_town, lose_specific_hero, time_expires
 from h3map.heroes3map.models import Header, PlayerInfo, AiType, FactionInfo, TownInfo, Hero, Metadata, TeamSetup, \
-    HeroInfo, CustomHeroInfo
-from h3map.heroes3map.pypickler.picklers import Uint16, Bool, Uchar
+    CustomHeroInfo
+from h3map.heroes3map.pypickler.picklers import Uint16, Bool
 from h3map.heroes3map.pypickler.combinators import Uint32, Uint8, FixedList, \
-    ArgWrap, kwrap, wrap, maybe, if_then, list_pp, string, alt, Sequ, altp
-from h3map.heroes3map.schema.transformations import _get_allowed_factions, _get_allowed_heroes
+    ArgWrap, kwrap, wrap, maybe, if_then, list_pp, string, altp
+from h3map.heroes3map.transformations import _get_allowed_factions, _get_allowed_heroes
 
 
 armageddons_blade = kwrap(
-    Header,
+    OrderedDict,
     metadata=kwrap(
-        Metadata,
+        OrderedDict,
         any_players=Bool,
         size=Uint32,
         two_level=Bool,
@@ -24,15 +26,15 @@ armageddons_blade = kwrap(
     ),
     player_infos=FixedList(
         kwrap(
-            PlayerInfo,
+            OrderedDict,
             can_human_play=Bool,
             can_computer_play=Bool,
             ai_type=kwrap(
-                AiType,
+                OrderedDict,
                 ai_type=Bool,
             ),
             faction_info=kwrap(
-                FactionInfo,
+                OrderedDict,
                 factions=wrap(
                     _get_allowed_factions,
                     _get_allowed_factions,
@@ -42,7 +44,7 @@ armageddons_blade = kwrap(
             ),
             town_info=maybe(
                 kwrap(
-                    TownInfo,
+                    OrderedDict,
                     a=Bool,
                     b=Bool,
                     x=Uint8,
@@ -51,12 +53,12 @@ armageddons_blade = kwrap(
                 )
             ),
             hero_properties=kwrap(
-                CustomHeroInfo,
+                OrderedDict,
                 has_random_hero=Bool,
                 custom=if_then(
                     lambda hid: True if hid != 255 else False,
                     kwrap(
-                        Hero,
+                        OrderedDict,
                         customid=Uint8,
                         name=string()
                     )
@@ -64,7 +66,7 @@ armageddons_blade = kwrap(
             ),
             heroes=list_pp(
                 wrap(lambda x: x[1], lambda x: (0, x, 0, 0), ArgWrap(Uint8, Uint8, Uint16, Uint8)),
-                kwrap(Hero, id=Uint8, name=string()))), 8),
+                kwrap(OrderedDict, id=Uint8, name=string()))), 8),
     winning_condition=altp(tag_cond, tag_cond, [
         standard_win,
         acquire_specific_artifact,
@@ -86,7 +88,7 @@ armageddons_blade = kwrap(
         time_expires
     ]),
     teams=kwrap(
-        TeamSetup,
+        OrderedDict,
         number_of_teams=Uint8,
         teams=FixedList(Uint8, 8),
     ),

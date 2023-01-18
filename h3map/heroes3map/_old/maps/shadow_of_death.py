@@ -1,8 +1,8 @@
 from h3map.header.constants import heroes
-from h3map.heroes3map.header.header_reader import Header, Metadata, PlayerInfo, Teams, AllowedHeroes, PlayerInfos, \
+from h3map.heroes3map._old.header.header_reader import Header, Metadata, PlayerInfo, Teams, AllowedHeroes, PlayerInfos, \
     AiTactic, FactionInfo, TownInfo, HeroProperties, HeroesBelongingToPlayers
-from h3map.heroes3map.header.loss_conditions import LossConditionReader
-from h3map.heroes3map.header.winning_conditions import WinningConditionReader
+from h3map.heroes3map._old.header.loss_conditions import LossConditionReader
+from h3map.heroes3map._old.header.winning_conditions import WinningConditionReader
 
 
 class ShadowOfDeath:

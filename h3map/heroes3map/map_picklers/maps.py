@@ -10,7 +10,7 @@ maps = {
     14: 0,  # RestorationOfErathia,
     21: 1,  # ArmageddonsBlade,
     28: 2,  # ShadowOfDeath,
-    30: 2,  # ShadowOfDeath,
+    30: 2,  # HornOfTheAbyss,
     31: 3,  # HornOfTheAbyss,
     32: 3,  # HornOfTheAbyss,
     51: 4,  # WakeOfGods,

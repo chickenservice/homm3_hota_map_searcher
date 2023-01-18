@@ -1,19 +1,19 @@
-from h3map.heroes3map.map_picklers.win_loss_conditions import winning_cond, loss_cond, tag_cond, standard_win, \
+from h3map.heroes3map.map_picklers.win_loss_conditions import tag_cond, standard_win, \
     acquire_specific_artifact, accumulate_creatures, accumulate_resources, upgrade_specific_town, build_grail_structure, \
     defeat_specific_hero, capture_specific_town, defeat_specific_monster, flag_all_creatures, flag_all_mines, \
     transport_specific_artifact, standard_loss, lose_specific_town, lose_specific_hero, time_expires
 from h3map.heroes3map.models import Header, PlayerInfo, AiType, FactionInfo, TownInfo, Hero, Metadata, TeamSetup, \
-    HeroInfo, CustomHeroInfo
-from h3map.heroes3map.pypickler.picklers import Uint16, Bool, Uchar
+    CustomHeroInfo
+from h3map.heroes3map.pypickler.picklers import Uint16, Bool
 from h3map.heroes3map.pypickler.combinators import Uint32, Uint8, FixedList, \
-    ArgWrap, kwrap, wrap, maybe, if_then, list_pp, string, alt, Sequ, altp
-from h3map.heroes3map.schema.transformations import _get_allowed_factions, _get_allowed_heroes
+    ArgWrap, kwrap, wrap, maybe, if_then, list_pp, string, altp
+from h3map.heroes3map.transformations import _get_allowed_factions, _get_allowed_heroes
 
 
 shadow_of_death = kwrap(
-    Header,
+    dict,
     metadata=kwrap(
-        Metadata,
+        dict,
         any_players=Bool,
         size=Uint32,
         two_level=Bool,
@@ -24,16 +24,16 @@ shadow_of_death = kwrap(
     ),
     player_infos=FixedList(
         kwrap(
-            PlayerInfo,
+            dict,
             can_human_play=Bool,
             can_computer_play=Bool,
             ai_type=kwrap(
-                AiType,
+                dict,
                 ai_type=Bool,
                 aggressiveness=Bool,
             ),
             faction_info=kwrap(
-                FactionInfo,
+                dict,
                 factions=wrap(
                     _get_allowed_factions,
                     _get_allowed_factions,
@@ -43,7 +43,7 @@ shadow_of_death = kwrap(
             ),
             town_info=maybe(
                 kwrap(
-                    TownInfo,
+                    dict,
                     a=Bool,
                     b=Bool,
                     x=Uint8,
@@ -52,12 +52,12 @@ shadow_of_death = kwrap(
                 )
             ),
             hero_properties=kwrap(
-                CustomHeroInfo,
+                dict,
                 has_random_hero=Bool,
                 custom=if_then(
                     lambda hid: True if hid != 255 else False,
                     kwrap(
-                        Hero,
+                        dict,
                         customid=Uint8,
                         name=string()
                     )
@@ -65,7 +65,7 @@ shadow_of_death = kwrap(
             ),
             heroes=list_pp(
                 wrap(lambda x: x[1], lambda x: (0, x, 0, 0), ArgWrap(Uint8, Uint8, Uint16, Uint8)),
-                kwrap(Hero, id=Uint8, name=string()))), 8),
+                kwrap(dict, id=Uint8, name=string()))), 8),
     winning_condition=altp(tag_cond, tag_cond, [
         standard_win,
         acquire_specific_artifact,
@@ -87,7 +87,7 @@ shadow_of_death = kwrap(
         time_expires
     ]),
     teams=kwrap(
-        TeamSetup,
+        dict,
         number_of_teams=Uint8,
         teams=FixedList(Uint8, 8),
     ),
