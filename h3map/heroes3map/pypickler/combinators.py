@@ -84,7 +84,11 @@ def wrap(i, j, pa):
 
 
 def kwrap(t, **kwpa):
-    return wrap(lambda kw: t(**dict(zip(kwpa, kw))), lambda v: tuple(getattr(v, k) for k in kwpa.keys()), ArgWrap(*kwpa.values()))
+    return wrap(
+        lambda kw: t(**dict(zip(kwpa, kw))),
+        lambda v: tuple(getattr(v, k) for k in kwpa.keys()),
+        ArgWrap(*kwpa.values())
+    )
 
 
 def zero_to(n):
@@ -92,7 +96,10 @@ def zero_to(n):
 
 
 def maybe(pa):
-    return alt(lambda b: 1 if b else 0, [Lift(None), wrap(ident, ident, pa)])
+    return alt(
+        lambda b: 1 if b else 0,
+        [Lift(None), wrap(ident, ident, pa)]
+    )
 
 
 def list_p(pa):
