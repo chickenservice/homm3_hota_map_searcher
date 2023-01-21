@@ -64,7 +64,7 @@ def ksequ(t, pa, kpb):
         lambda _: _,
         pa,
         lambda a: wrap(
-            lambda b: t(**a, **b),
+            lambda b: t(a, **b),
             lambda b: b,
             kpb(a)
         )

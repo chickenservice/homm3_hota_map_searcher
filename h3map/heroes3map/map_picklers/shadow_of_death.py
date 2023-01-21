@@ -4,7 +4,7 @@ from h3map.heroes3map.map_picklers.win_loss_conditions import tag_cond, standard
     defeat_specific_hero, capture_specific_town, defeat_specific_monster, flag_all_creatures, flag_all_mines, \
     transport_specific_artifact, standard_loss, lose_specific_town, lose_specific_hero, time_expires
 from h3map.heroes3map.pypickler.combinators import Uint32, Uint8, FixedList, \
-    kwrap, wrap, string, altp
+    kwrap, wrap, string, altp, Lift
 from h3map.heroes3map.pypickler.picklers import Bool
 from h3map.heroes3map.transformations import _get_allowed_heroes
 

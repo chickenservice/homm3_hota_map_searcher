@@ -1,0 +1,12 @@
+DROP TABLE config;
+DROP TABLE player_town;
+DROP TABLE player;
+DROP TABLE player_color;
+DROP TABLE faction;
+DROP TABLE team;
+DROP TABLE map;
+DROP TABLE difficulty;
+DROP TABLE victory_condition;
+DROP TABLE loss_condition;
+DROP TABLE version;
+DROP TABLE map_size;

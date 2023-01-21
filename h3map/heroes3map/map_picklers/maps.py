@@ -3,7 +3,7 @@ from h3map.heroes3map.map_picklers.horn_of_the_abyss import horn_of_the_abyss
 from h3map.heroes3map.map_picklers.restoration_of_erathia import restoration_of_erathia
 from h3map.heroes3map.map_picklers.shadow_of_death import shadow_of_death
 from h3map.heroes3map.map_picklers.wake_of_gods import wake_of_gods
-from h3map.heroes3map.pypickler.combinators import Sequ
+from h3map.heroes3map.pypickler.combinators import Sequ, kwrap, Lift, ksequ
 from h3map.heroes3map.pypickler.picklers import Uint32
 
 maps = {
@@ -24,4 +24,8 @@ p = [
     wake_of_gods
 ]
 
-heroes3map = Sequ(lambda v: maps[v], Uint32, lambda i: p[maps[i]])
+heroes3map = ksequ(
+    dict,
+    kwrap(dict, version=Uint32),
+    lambda a: p[maps[a["version"]]]
+)

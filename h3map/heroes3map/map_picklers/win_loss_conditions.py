@@ -14,7 +14,7 @@ loss_cond = altp(tag_cond, tag_cond,
                  [
                  ])
 
-standard_loss = Lift(StandardLossCondition)
+standard_loss = Lift(dict(name="Standard loss"))
 
 lose_specific_town = kwrap(
     dict,
@@ -37,7 +37,7 @@ time_expires = kwrap(
     name=Lift("Time expires"),
     days=Uint16)
 
-standard_win = Lift(StandardWinningCondition)
+standard_win = Lift(dict(name="Standard win"))
 
 acquire_specific_artifact = kwrap(
     dict,
