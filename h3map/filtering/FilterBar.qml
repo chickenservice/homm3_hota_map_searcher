@@ -50,5 +50,7 @@ Row {
         }
     }
 
-
+    Component.onCompleted: {
+        filterModel.apply()
+    }
 }

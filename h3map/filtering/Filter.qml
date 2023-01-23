@@ -14,7 +14,6 @@ Item {
         id: amountOfPlayers
         name: "Players"
         filterOptions: ListModel {
-            ListElement { name: 0; selected: false; value: 0; count: 0; enabled: false }
             ListElement { name: 1; selected: false; value: 1; count: 0; enabled: false }
             ListElement { name: 2; selected: false; value: 2; count: 0; enabled: false }
             ListElement { name: 3; selected: false; value: 3; count: 0; enabled: false }
@@ -38,7 +37,6 @@ Item {
                 amountOfPlayers.filterOptions.setProperty(5, 'count', data[5])
                 amountOfPlayers.filterOptions.setProperty(6, 'count', data[6])
                 amountOfPlayers.filterOptions.setProperty(7, 'count', data[7])
-                amountOfPlayers.filterOptions.setProperty(8, 'count', data[8])
                 amountOfPlayers.setAvailableOptions()
             }
 
@@ -52,7 +50,6 @@ Item {
         id: teamSize
         name: "Teams"
         filterOptions: ListModel {
-            ListElement { name: 0; selected: false; value: 0;  count: 0; enabled: false }
             ListElement { name: 1; selected: false; value: 1;  count: 0; enabled: false }
             ListElement { name: 2; selected: false; value: 2;  count: 0; enabled: false }
             ListElement { name: 3; selected: false; value: 3;  count: 0; enabled: false }
@@ -76,7 +73,6 @@ Item {
                 teamSize.filterOptions.setProperty(5, 'count', data[5])
                 teamSize.filterOptions.setProperty(6, 'count', data[6])
                 teamSize.filterOptions.setProperty(7, 'count', data[7])
-                teamSize.filterOptions.setProperty(8, 'count', data[8])
                 teamSize.setAvailableOptions()
             }
 
@@ -90,6 +86,27 @@ Item {
         id: mapSize
         name: "Map Size"
         filterOptions: ListModel {
+            ListElement {
+                name: "G"
+                selected: false
+                value: "G"
+                count: 0
+                enabled: false
+            }
+            ListElement {
+                name: "XH"
+                selected: false
+                value: "XH"
+                count: 0
+                enabled: false
+            }
+            ListElement {
+                name: "H"
+                selected: false
+                value: "H"
+                count: 0
+                enabled: false
+            }
             ListElement {
                 name: "XL"
                 selected: false
@@ -125,10 +142,13 @@ Item {
 
             function onApplied(summary) {
                 var data = summary["mapSize"]
-                mapSize.filterOptions.setProperty(0, 'count', data['XL'])
-                mapSize.filterOptions.setProperty(1, 'count', data['L'])
-                mapSize.filterOptions.setProperty(2, 'count', data['M'])
-                mapSize.filterOptions.setProperty(3, 'count', data['S'])
+                mapSize.filterOptions.setProperty(0, 'count', data['G'])
+                mapSize.filterOptions.setProperty(1, 'count', data['XH'])
+                mapSize.filterOptions.setProperty(2, 'count', data['H'])
+                mapSize.filterOptions.setProperty(3, 'count', data['XL'])
+                mapSize.filterOptions.setProperty(4, 'count', data['L'])
+                mapSize.filterOptions.setProperty(5, 'count', data['M'])
+                mapSize.filterOptions.setProperty(6, 'count', data['S'])
                 mapSize.setAvailableOptions()
             }
 
@@ -137,6 +157,7 @@ Item {
             }
         }
     }
+
 
     function checkEnabled(count) {
         return count > 0

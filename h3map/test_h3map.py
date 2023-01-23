@@ -3,7 +3,6 @@ import gzip
 
 import sqlite3
 from pathlib import Path
-from sqlite3 import IntegrityError
 
 from h3map.heroes3map.map_picklers.maps import heroes3map
 
@@ -81,11 +80,9 @@ def store(c, i, map_info):
     )
     c.execute("SELECT count(*) FROM map")
     mapid = c.fetchone()[0]
-    pls = [(pl["can_human_play"], pl["can_computer_play"], mapid, pl_cl[j], get_team(map_info["teams"], j)) for j, pl in enumerate(map_info["player_infos"])]
+    pls = [(pl["can_human_play"], pl["can_computer_play"], mapid, pl_cl[j], get_team(map_info["teams"], j)) for j, pl in enumerate(map_info["player_infos"]) if pl["can_computer_play"] or pl["can_human_play"]]
     for _p in pls:
         c.execute("INSERT INTO player(can_computer_play, can_human_play, map, player_color, team) VALUES(?, ?, ?, ?, ?)", _p)
-
-
 
 
 def upgrade():
