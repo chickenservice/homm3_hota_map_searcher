@@ -84,10 +84,20 @@ ComboBox {
 
         CheckBox {
             id: filterSelected
-            checked: selected
+            checked: model.selected
             enabled: model.enabled
             onClicked: {
                 control.activated(index)
+            }
+
+            // if a user clicks the same checkbox
+            // very quickly in succession keep in sync
+            // with the model
+            nextCheckState: function() {
+                if (model.selected)
+                    return Qt.Checked
+                else
+                    return Qt.Unchecked
             }
         }
 

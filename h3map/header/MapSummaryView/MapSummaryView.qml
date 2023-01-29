@@ -21,6 +21,11 @@ Card {
 
         spacing: 2
 
+        Text {
+            id: dbid
+            text: model.id
+        }
+
         MapDetails {
 
         }

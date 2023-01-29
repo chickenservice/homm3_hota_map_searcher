@@ -6,7 +6,7 @@ Row {
     spacing: 2
 
     Image {
-        source: "../../_QmlComponents/img/" + model.thumbnail
+        source: "../../_QmlComponents/img/"// + model.thumbnail
         sourceSize.width: 128
         fillMode: Image.PreserveAspectFit
     }
@@ -29,27 +29,27 @@ Row {
             spacing: 15
         Column{
             Text {
-                text: "Teams: " + model.teams
+                text: "Teams: "// + model.teams
                 font.italic: true
             }
 
             Text {
-                text: "Players: " + model.players
+                text: "Players: "// + model.players
                 font.italic: true
             }
 
             Text {
-                text: "Humans: " + model.humans
+                text: "Humans: "// + model.humans
                 font.italic: true
             }
 
             Text {
-                text: "Winning condition: " + model.win_cond
+                text: "Winning condition: " + model.victory_condition
                 font.italic: true
             }
 
             Text {
-                text: "Loss condition: " + model.loss_cond
+                text: "Loss condition: " + model.loss_condition
                 font.italic: true
             }
 
@@ -57,7 +57,7 @@ Row {
         Column {
 
             Text {
-                text: "Map size: " + model.size
+                text: "Map size: " + model.map_size
                 font.italic: true
             }
 

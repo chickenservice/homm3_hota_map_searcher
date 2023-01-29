@@ -31,5 +31,7 @@
         <file>filtering/FilterBarMock.qml</file>
         <file>Theme.qml</file>
         <file>qmldir</file>
+        <file>_QmlComponents/PySortFilterModel.qml</file>
+        <file>_QmlComponents/PySortFilterList.qml</file>
     </qresource>
 </RCC>
